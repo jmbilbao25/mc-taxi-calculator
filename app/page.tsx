@@ -1,103 +1,154 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+
+export default function TaxiFareCalculator() {
+  const [distance, setDistance] = useState('');
+  const [fare, setFare] = useState<number | null>(null);
+  const [breakdown, setBreakdown] = useState<string>('');
+  const [error, setError] = useState('');
+
+  const calculateFare = (distanceKm: number): { fare: number; breakdown: string } => {
+    let totalFare = 0;
+    let breakdownText = '';
+
+    if (distanceKm >= 1 && distanceKm <= 2) {
+      // 1km to 2km: 50 pesos (base fare)
+      totalFare = 50;
+      breakdownText = `Base fare (1-2km): ₱50.00`;
+    } else if (distanceKm >= 3 && distanceKm <= 8) {
+      // 3km to 8km: 50 pesos base + (distance - 2) × 10 pesos
+      const additionalKm = distanceKm - 2;
+      const additionalFare = additionalKm * 10;
+      totalFare = 50 + additionalFare;
+      breakdownText = `Base fare: ₱50.00\nAdditional ${additionalKm.toFixed(2)}km × ₱10.00 = ₱${additionalFare.toFixed(2)}`;
+    } else if (distanceKm >= 9) {
+      // 9km and above: 50 pesos base + (6 × 10 pesos) + (distance - 8) × 12 pesos
+      const tier1Km = 6; // 3-8km range (6km total)
+      const tier1Fare = tier1Km * 10;
+      const tier2Km = distanceKm - 8;
+      const tier2Fare = tier2Km * 12;
+      totalFare = 50 + tier1Fare + tier2Fare;
+      breakdownText = `Base fare: ₱50.00\n3-8km (${tier1Km}km) × ₱10.00 = ₱${tier1Fare.toFixed(2)}\n9km+ (${tier2Km.toFixed(2)}km) × ₱12.00 = ₱${tier2Fare.toFixed(2)}`;
+    }
+
+    return { fare: totalFare, breakdown: breakdownText };
+  };
+
+  const handleCalculate = () => {
+    setError('');
+    setFare(null);
+    setBreakdown('');
+
+    const distanceValue = parseFloat(distance);
+    
+    if (isNaN(distanceValue) || distanceValue <= 0) {
+      setError('Please enter a valid positive distance.');
+      return;
+    }
+
+    if (distanceValue < 1) {
+      setError('Minimum distance is 1km.');
+      return;
+    }
+
+    if (distanceValue > 100) {
+      setError('Distance cannot exceed 100km.');
+      return;
+    }
+
+    const result = calculateFare(distanceValue);
+    setFare(result.fare);
+    setBreakdown(result.breakdown);
+  };
+
+  const handleReset = () => {
+    setDistance('');
+    setFare(null);
+    setBreakdown('');
+    setError('');
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">MC Taxi</h1>
+          <h2 className="text-xl font-semibold text-gray-600">Fare Calculator</h2>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="space-y-6">
+          {/* Input Section */}
+          <div>
+            <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
+              Distance (kilometers)
+            </label>
+            <input
+              type="number"
+              id="distance"
+              value={distance}
+              onChange={(e) => setDistance(e.target.value)}
+              placeholder="Enter distance (e.g., 5.5)"
+              step="0.01"
+              min="1"
+              max="100"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+            />
+          </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={handleCalculate}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+            >
+              Calculate Fare
+            </button>
+            <button
+              onClick={handleReset}
+              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200"
+            >
+              Reset
+            </button>
+          </div>
+
+          {/* Results */}
+          {fare !== null && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Total Fare</h3>
+                <div className="text-3xl font-bold text-green-600">
+                  ₱{fare.toFixed(2)}
+                </div>
+              </div>
+              
+              <div className="border-t border-green-200 pt-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">Fare Breakdown:</h4>
+                <div className="text-sm text-gray-600 whitespace-pre-line">
+                  {breakdown}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Fare Structure Info */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">Fare Structure:</h3>
+            <div className="text-xs text-gray-600 space-y-1">
+              <div>• 1-2km: ₱50.00 (base fare)</div>
+              <div>• 3-8km: ₱50.00 + ₱10.00/km</div>
+              <div>• 9km+: ₱50.00 + ₱60.00 + ₱12.00/km</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
