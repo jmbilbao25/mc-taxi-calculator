@@ -80,7 +80,7 @@ export default function TaxiFareCalculator() {
         <div className="space-y-6">
           {/* Input Section */}
           <div>
-            <label htmlFor="distance" className="block text-sm font-medium text-black-700 mb-2">
+            <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
               Distance (kilometers)
             </label>
             <input
@@ -92,13 +92,13 @@ export default function TaxiFareCalculator() {
               step="0.01"
               min="1"
               max="100"
-              className="w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg text-gray-900"
             />
           </div>
 
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 border border-red-200  p-3">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
               <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}
@@ -107,13 +107,13 @@ export default function TaxiFareCalculator() {
           <div className="flex gap-3">
             <button
               onClick={handleCalculate}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6  transition-colors duration-200"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
             >
               Calculate Fare
             </button>
             <button
               onClick={handleReset}
-              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold  hover:bg-gray-50 transition-colors duration-200"
+              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200"
             >
               Reset
             </button>
@@ -121,7 +121,7 @@ export default function TaxiFareCalculator() {
 
           {/* Results */}
           {fare !== null && (
-            <div className="bg-green-50 border border-green-200  p-6">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
               <div className="text-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Total Fare</h3>
                 <div className="text-3xl font-bold text-green-600">
@@ -139,7 +139,7 @@ export default function TaxiFareCalculator() {
           )}
 
           {/* Fare Structure Info */}
-          <div className="bg-gray-50  p-4">
+          <div className="bg-gray-50 rounded-lg p-4">
             <h3 className="text-sm font-semibold text-gray-700 mb-2">Fare Structure:</h3>
             <div className="text-xs text-gray-600 space-y-1">
               <div>• 1-2km: ₱50.00 (base fare)</div>
