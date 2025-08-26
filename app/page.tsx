@@ -80,7 +80,7 @@ export default function TaxiFareCalculator() {
         <div className="space-y-6">
           {/* Input Section */}
           <div>
-            <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="distance" className="block text-sm font-medium text-black-700 mb-2">
               Distance (kilometers)
             </label>
             <input
