@@ -39,7 +39,7 @@ const fareController = {
         await updateMetrics(vehicleType, totalFare);
         
         // Record Prometheus metrics
-        recordFareCalculation(vehicleType, totalFare, true);
+        recordFareCalculation(vehicleType);
 
       res.status(200).json({
         success: true,
