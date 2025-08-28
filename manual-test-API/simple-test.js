@@ -1,12 +1,12 @@
 const http = require('http');
 
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'http://13.211.151.184:3001';
 
 // Simple HTTP request function
 function makeRequest(method, path, data = null) {
   return new Promise((resolve, reject) => {
     const options = {
-      hostname: 'localhost',
+      hostname: '13.211.151.184',
       port: 3001,
       path: path,
       method: method,
@@ -157,7 +157,7 @@ async function testAPI() {
   } catch (error) {
     console.error('❌ Test failed:', error.message);
     if (error.code === 'ECONNREFUSED') {
-      console.log('💡 Make sure your server is running on http://localhost:3001');
+             console.log('💡 Make sure your server is running on http://13.211.151.184:3001');
     }
   }
 }

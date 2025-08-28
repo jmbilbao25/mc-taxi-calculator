@@ -11,7 +11,7 @@ export default function TaxiFareCalculator() {
   const [loading, setLoading] = useState(false);
 
   // Use EC2 backend URL - replace with your actual EC2 public IP
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.107.78.253:3001';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.211.151.184:3001';
   
   // Ensure API_URL is always an absolute URL
   const getApiUrl = (endpoint: string) => {

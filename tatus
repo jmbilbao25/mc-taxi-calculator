@@ -1,0 +1,203 @@
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex 5ef6a52..4e50592 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -38,4 +38,3 @@[m [myarn-error.log*[m
+ [m
+ # typescript[m
+ *.tsbuildinfo[m
+[31m-next-env.d.ts[m
+[1mdiff --git a/GRAFANA_README.md b/GRAFANA_README.md[m
+[1mnew file mode 100644[m
+[1mindex 0000000..ddeeb8e[m
+[1m--- /dev/null[m
+[1m+++ b/GRAFANA_README.md[m
+[36m@@ -0,0 +1,214 @@[m
+[32m+[m[32m# 📊 MC Taxi API - Grafana Monitoring[m
+[32m+[m
+[32m+[m[32mThis guide will help you set up comprehensive monitoring for your MC Taxi API using Grafana, Prometheus, and related tools.[m
+[32m+[m
+[32m+[m[32m## 🎯 What's Included[m
+[32m+[m
+[32m+[m[32m- **Grafana**: Beautiful dashboards and visualizations[m
+[32m+[m[32m- **Prometheus**: Metrics collection and storage[m
+[32m+[m[32m- **Node Exporter**: System metrics (CPU, memory, disk)[m
+[32m+[m[32m- **cAdvisor**: Container metrics[m
+[32m+[m[32m- **Custom Metrics**: API-specific metrics for fare calculations[m
+[32m+[m
+[32m+[m[32m## 🚀 Quick Start[m
+[32m+[m
+[32m+[m[32m### Prerequisites[m
+[32m+[m[32m- Docker and Docker Compose installed[m
+[32m+[m[32m- Node.js and npm[m
+[32m+[m[32m- Your MC Taxi API running[m
+[32m+[m
+[32m+[m[32m### Setup Steps[m
+[32m+[m
+[32m+[m[32m1. **Install Dependencies**[m
+[32m+[m[32m   ```bash[m
+[32m+[m[32m   npm install prom-client[m
+[32m+[m[32m   ```[m
+[32m+[m
+[32m+[m[32m2. **Run Setup Script**[m
+[32m+[m[32m   ```bash[m
+[32m+[m[32m   chmod +x setup-grafana.sh[m
+[32m+[m[32m   ./setup-grafana.sh[m
+[32m+[m[32m   ```[m
+[32m+[m
+[32m+[m[32m3. **Or Manual Setup**[m
+[32m+[m[32m   ```bash[m
+[32m+[m[32m   # Create directories[m
+[32m+[m[32m   mkdir -p monitoring/grafana/provisioning/datasources[m
+[32m+[m[32m   mkdir -p monitoring/grafana/provisioning/dashboards[m
+[32m+[m[32m   mkdir -p monitoring/grafana/dashboards[m
+[32m+[m[41m   [m
+[32m+[m[32m   # Start monitoring stack[m
+[32m+[m[32m   docker-compose -f docker-compose.grafana.yml up -d[m
+[32m+[m[32m   ```[m
+[32m+[m
+[32m+[m[32m## 📊 Access URLs[m
+[32m+[m
+[32m+[m[32m| Service | URL | Credentials |[m
+[32m+[m[32m|---------|-----|-------------|[m
+[32m+[m[32m| **Grafana** | http://localhost:3000 | admin/admin123 |[m
+[32m+[m[32m| **Prometheus** | http://localhost:9090 | - |[m
+[32m+[m[32m| **Node Exporter** | http://localhost:9100 | - |[m
+[32m+[m[32m| **cAdvisor** | http://localhost:8080 | - |[m
+[32m+[m
+[32m+[m[32m## 📈 Dashboard Features[m
+[32m+[m
+[32m+[m[32m### MC Taxi API Dashboard[m
+[32m+[m[32m- **Total API Requests**: Count of all API calls[m
+[32m+[m[32m- **Total Fare Calculations**: Number of fare calculations[m
+[32m+[m[32m- **Average Fare**: Average fare amount in PHP[m
+[32m+[m[32m- **Vehicle Type Distribution**: Pie chart of vehicle types used[m
+[32m+[m[32m- **API Response Time**: Response time trends[m
+[32m+[m[32m- **Requests per Minute**: API throughput[m
+[32m+[m[32m- **System CPU Usage**: Server CPU utilization[m
+[32m+[m[32m- **System Memory Usage**: Server memory utilization[m
+[32m+[m
+[32m+[m[32m### Custom Metrics[m
+[32m+[m[32m- `mc_taxi_total_requests`: Total HTTP requests[m
+[32m+[m[32m- `mc_taxi_total_calculations`: Total fare calculations[m
+[32m+[m[32m- `mc_taxi_average_fare`: Average fare amount[m
+[32m+[m[32m- `mc_taxi_vehicle_type_count`: Vehicle type usage[m
+[32m+[m[32m- `mc_taxi_request_duration_seconds`: API response times[m
+[32m+[m
+[32m+[m[32m## 🔧 Configuration[m
+[32m+[m
+[32m+[m[32m### Prometheus Configuration[m
+[32m+[m[32mLocated at `monitoring/prometheus.yml`:[m
+[32m+[m[32m- Scrapes metrics from your API at `/metrics`[m
+[32m+[m[32m- Collects system metrics from Node Exporter[m
+[32m+[m[32m- Collects container metrics from cAdvisor[m
+[32m+[m
+[32m+[m[32m### Grafana Configuration[m
+[32m+[m[32m- **Datasources**: Automatically configured to use Prometheus[m
+[32m+[m[32m- **Dashboards**: Pre-configured MC Taxi dashboard[m
+[32m+[m[32m- **Provisioning**: Automatic setup on startup[m
+[32m+[m
+[32m+[m[32m## 🐳 Docker Services[m
+[32m+[m
+[32m+[m[32m### Prometheus[m
+[32m+[m[32m- **Port**: 9090[m
+[32m+[m[32m- **Purpose**: Metrics collection and storage[m
+[32m+[m[32m- **Data Retention**: 200 hours[m
+[32m+[m
+[32m+[m[32m### Grafana[m
+[32m+[m[32m- **Port**: 3000[m
+[32m+[m[32m- **Purpose**: Dashboard visualization[m
+[32m+[m[32m- **Default User**: admin/admin123[m
+[32m+[m
+[32m+[m[32m### Node Exporter[m
+[32m+[m[32m- **Port**: 9100[m
+[32m+[m[32m- **Purpose**: System metrics collection[m
+[32m+[m
+[32m+[m[32m### cAdvisor[m
+[32m+[m[32m- **Port**: 8080[m
+[32m+[m[32m- **Purpose**: Container metrics collection[m
+[32m+[m
+[32m+[m[32m## 📊 Using the Dashboard[m
+[32m+[m
+[32m+[m[32m1. **Login to Grafana**[m
+[32m+[m[32m   - URL: http://localhost:3000[m
+[32m+[m[32m   - Username: admin[m
+[32m+[m[32m   - Password: admin123[m
+[32m+[m
+[32m+[m[32m2. **View MC Taxi Dashboard**[m
+[32m+[m[32m   - Should be automatically loaded[m
+[32m+[m[32m   - Or navigate to Dashboards → MC Taxi API Dashboard[m
+[32m+[m
+[32m+[m[32m3. **Generate Metrics**[m
+[32m+[m[32m   - Make API calls to your backend[m
+[32m+[m[32m   - Watch metrics update in real-time[m
+[32m+[m
+[32m+[m[32m## 🔍 Troubleshooting[m
+[32m+[m
+[32m+[m[32m### Services Not Starting[m
+[32m+[m[32m```bash[m
+[32m+[m[32m# Check service status[m
+[32m+[m[32mdocker-compose -f docker-compose.grafana.yml ps[m
+[32m+[m
+[32m+[m[32m# View logs[m
+[32m+[m[32mdocker-compose -f docker-compose.grafana.yml logs[m
+[32m+[m
+[32m+[m[32m# Restart services[m
+[32m+[m[32mdocker-compose -f docker-compose.grafana.yml restart[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m### No Metrics Showing[m
+[32m+[m[32m1. **Check Prometheus Targets**[m
+[32m+[m[32m   - Go to http://localhost:9090/targets[m
+[32m+[m[32m   - Ensure all targets are "UP"[m
+[32m+[m
+[32m+[m[32m2. **Check API Metrics Endpoint**[m
+[32m+[m[32m   - Visit http://your-api-url:3001/metrics[m
+[32m+[m[32m   - Should return Prometheus metrics[m
+[32m+[m
+[32m+[m[32m3. **Verify Network Connectivity**[m
+[32m+[m[32m   - Ensure Prometheus can reach your API[m
+[32m+[m[32m   - Check firewall settings[m
+[32m+[m
+[32m+[m[32m### Dashboard Not Loading[m
+[32m+[m[32m1. **Check Grafana Logs**[m
+[32m+[m[32m   ```bash[m
+[32m+[m[32m   docker-compose -f docker-compose.grafana.yml logs grafana[m
+[32m+[m[32m   ```[m
+[32m+[m
+[32m+[m[32m2. **Verify Datasource**[m
+[32m+[m[32m   - Go to Configuration → Data Sources[m
+[32m+[m[32m   - Ensure Prometheus is connected[m
+[32m+[m
+[32m+[m[32m3. **Check Dashboard Provisioning**[m
+[32m+[m[32m   - Verify dashboard files are in correct location[m
+[32m+[m[32m   - Check file permissions[m
+[32m+[m
+[32m+[m[32m## 🛠️ Customization[m
+[32m+[m
+[32m+[m[32m### Adding New Metrics[m
+[32m+[m[32m1. **Update `middleware/metrics.js`**[m
+[32m+[m[32m   - Add new Prometheus metrics[m
+[32m+[m[32m   - Register them with the registry[m
+[32m+[m
+[32m+[m[32m2. **Update Dashboard**[m
+[32m+[m[32m   - Add new panels to `monitoring/grafana/dashboards/mc-taxi-dashboard.json`[m
+[32m+[m[32m   - Use PromQL queries to display data[m
+[32m+[m
+[32m+[m[32m### Modifying Dashboard[m
+[32m+[m[32m1. **Edit Dashboard JSON**[m
+[32m+[m[32m   - Modify `monitoring/grafana/dashboards/mc-taxi-dashboard.json`[m
+[32m+[m[32m   - Restart Grafana to apply changes[m
+[32m+[m
+[32m+[m[32m2. **Use Grafana UI**[m
+[32m+[m[32m   - Make changes in Grafana interface[m
+[32m+[m[32m   - Export updated dashboard JSON[m
+[32m+[m
+[32m+[m[32m## 📚 Useful PromQL Queries[m
+[32m+[m
+[32m+[m[32m```promql[m
+[32m+[m[32m# Total requests per minute[m
+[32m+[m[32mrate(mc_taxi_total_requests[1m]) * 60[m
+[32m+[m
+[32m+[m[32m# Average response time[m
+[32m+[m[32mra

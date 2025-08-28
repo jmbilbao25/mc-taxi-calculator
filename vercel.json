@@ -7,6 +7,6 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_API_URL": "http://3.107.78.253:3001"
+    "NEXT_PUBLIC_API_URL": "http://13.211.151.184:3001"
   }
 }
