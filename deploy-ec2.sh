@@ -23,10 +23,10 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if running on EC2
-if [ ! -f /sys/hypervisor/uuid ]; then
-    print_error "This script should be run on an EC2 instance"
-    exit 1
+# Check if running on EC2 (more reliable check)
+if ! curl -s http://169.254.169.254/latest/meta-data/instance-id > /dev/null 2>&1; then
+    print_warning "This script is designed for EC2 instances, but continuing anyway..."
+    # Don't exit, just warn
 fi
 
 # Update system
