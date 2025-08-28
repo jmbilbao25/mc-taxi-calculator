@@ -182,15 +182,15 @@ cd mc-taxi-calculator
 npm install
 
 # Environment setup
-cp .env.example .env.local
+cp env.example .env.local
 # Configure your environment variables
 
 # Start development servers
 npm run dev          # Frontend (localhost:3000)
 npm run server:dev   # Backend (localhost:3001)
 
-# Start with monitoring (Docker required)
-docker-compose up -d
+# Start with Docker monitoring
+docker-compose -f config/docker/docker-compose.yml up -d
 ```
 
 ### **Environment Variables**
@@ -207,7 +207,32 @@ NODE_ENV=development
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
+### **Project Structure**
+
+```
+mc-taxi-calculator/
+├── app/                    # Next.js frontend
+├── config/                 # Configuration files
+│   ├── docker/            # Docker compositions
+│   └── deployment/        # Platform deployments
+├── docs/                  # Documentation
+├── monitoring/            # Grafana & Prometheus
+├── postman/              # API testing collections
+├── controllers/          # Express controllers
+├── middleware/           # Express middleware
+├── models/              # MongoDB models
+└── routes/              # Express routes
+```
+
 ## 📱 API Documentation
+
+### **Postman Collection**
+
+Import the complete API collection:
+- File: `postman/MC-Taxi-Calculator-API.postman_collection.json`
+- Environment: `postman/environments/Local-Development.postman_environment.json`
+
+The collection includes all endpoints, validation tests, and edge cases.
 
 ### **Endpoints**
 

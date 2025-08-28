@@ -1,0 +1,382 @@
+{
+  "info": {
+    "name": "MC Taxi Calculator API",
+    "description": "Complete API collection for the MC Taxi Calculator application",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "apiUrl",
+      "value": "{{baseUrl}}/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Fare Calculation",
+      "item": [
+        {
+          "name": "Calculate Motorcycle Fare",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 10.5,\n  \"vehicleType\": \"motorcycle\",\n  \"clientId\": \"postman-test\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Calculate fare for a motorcycle ride"
+          },
+          "response": [
+            {
+              "name": "Successful Calculation",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"totalFare\": 176,\n    \"breakdown\": \"Base fare: ₱50\\nDistance: 10.5km × ₱12/km = ₱126\\nTotal: ₱176\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Calculate Car Fare (Coming Soon)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 15,\n  \"vehicleType\": \"car\",\n  \"clientId\": \"postman-test\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Attempt to calculate fare for a car (currently not supported)"
+          }
+        },
+        {
+          "name": "Invalid Distance - Too Low",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 0.5,\n  \"vehicleType\": \"motorcycle\",\n  \"clientId\": \"postman-test\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Test validation for distance below minimum (1km)"
+          },
+          "response": [
+            {
+              "name": "Validation Error",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"details\": \"Distance must be at least 1km\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Invalid Distance - Too High",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 1500,\n  \"vehicleType\": \"motorcycle\",\n  \"clientId\": \"postman-test\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Test validation for distance above maximum (1000km)"
+          }
+        },
+        {
+          "name": "Invalid Vehicle Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 10,\n  \"vehicleType\": \"airplane\",\n  \"clientId\": \"postman-test\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Test validation for invalid vehicle type"
+          }
+        },
+        {
+          "name": "Missing Required Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 10\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Test validation when required fields are missing"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health & Status",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/health",
+              "host": ["{{apiUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check API health status"
+          },
+          "response": [
+            {
+              "name": "Healthy Response",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"status\": \"healthy\",\n  \"timestamp\": \"2024-01-15T10:30:00.000Z\",\n  \"uptime\": 3600,\n  \"database\": \"connected\",\n  \"memory\": {\n    \"used\": 45,\n    \"total\": 512\n  },\n  \"version\": \"1.0.0\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Prometheus Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics"]
+            },
+            "description": "Get Prometheus-formatted metrics"
+          },
+          "response": [
+            {
+              "name": "Metrics Response",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "# HELP http_requests_total Total number of HTTP requests\n# TYPE http_requests_total counter\nhttp_requests_total{method=\"GET\",route=\"/api/health\",status_code=\"200\"} 1\n\n# HELP fare_calculations_total Total number of fare calculations performed\n# TYPE fare_calculations_total counter\nfare_calculations_total{vehicle_type=\"motorcycle\",status=\"success\"} 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rate Limiting Tests",
+      "item": [
+        {
+          "name": "Rate Limit Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 5,\n  \"vehicleType\": \"motorcycle\",\n  \"clientId\": \"rate-limit-test\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Use this request multiple times quickly to test rate limiting (100 requests per 15 minutes)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Edge Cases",
+      "item": [
+        {
+          "name": "Maximum Valid Distance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 1000,\n  \"vehicleType\": \"motorcycle\",\n  \"clientId\": \"edge-case-test\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Test with maximum allowed distance (1000km)"
+          }
+        },
+        {
+          "name": "Minimum Valid Distance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 1,\n  \"vehicleType\": \"motorcycle\",\n  \"clientId\": \"edge-case-test\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Test with minimum allowed distance (1km)"
+          }
+        },
+        {
+          "name": "Decimal Distance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 2.75,\n  \"vehicleType\": \"motorcycle\",\n  \"clientId\": \"decimal-test\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Test with decimal distance values"
+          }
+        },
+        {
+          "name": "Very Long Client ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"distance\": 5,\n  \"vehicleType\": \"motorcycle\",\n  \"clientId\": \"this-is-a-very-long-client-id-that-might-exceed-normal-limits-and-could-potentially-cause-validation-issues\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/calculate-fare",
+              "host": ["{{apiUrl}}"],
+              "path": ["calculate-fare"]
+            },
+            "description": "Test with unusually long client ID"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set timestamp for requests",
+          "pm.globals.set('timestamp', new Date().toISOString());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Basic tests for all requests",
+          "pm.test('Response time is less than 2000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});",
+          "",
+          "pm.test('Content-Type header is present', function () {",
+          "    pm.expect(pm.response.headers.get('Content-Type')).to.exist;",
+          "});"
+        ]
+      }
+    }
+  ]
+}
