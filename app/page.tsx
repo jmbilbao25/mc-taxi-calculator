@@ -11,7 +11,13 @@ export default function TaxiFareCalculator() {
   const [loading, setLoading] = useState(false);
 
   // Use EC2 backend URL - replace with your actual EC2 public IP
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.107.78.253:3001'; 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.107.78.253:3001';
+  
+  // Ensure API_URL is always an absolute URL
+  const getApiUrl = (endpoint: string) => {
+    const baseUrl = API_URL.startsWith('http') ? API_URL : `http://${API_URL}`;
+    return `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  }; 
 
   const handleCalculate = async () => {
     setError('');
@@ -40,8 +46,9 @@ export default function TaxiFareCalculator() {
     }
 
          try {
-       console.log('Making request to:', `${API_URL}/api/calculate-fare`);
-       const response = await fetch(`${API_URL}/api/calculate-fare`, {
+       const apiUrl = getApiUrl('/api/calculate-fare');
+       console.log('Making request to:', apiUrl);
+       const response = await fetch(apiUrl, {
          method: 'POST',
          headers: {
            'Content-Type': 'application/json',
@@ -68,7 +75,7 @@ export default function TaxiFareCalculator() {
      } catch (err) {
        console.error('API Error:', err);
        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-       setError(`Failed to connect to the server: ${errorMessage}. URL: ${API_URL}/api/calculate-fare`);
+       setError(`Failed to connect to the server: ${errorMessage}. URL: ${getApiUrl('/api/calculate-fare')}`);
      } finally {
        setLoading(false);
      }
