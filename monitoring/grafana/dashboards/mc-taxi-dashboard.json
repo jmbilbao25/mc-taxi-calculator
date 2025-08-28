@@ -12,7 +12,7 @@
         "type": "stat",
         "targets": [
           {
-            "expr": "mc_taxi_total_requests",
+            "expr": "mc_taxi_http_requests_total",
             "legendFormat": "Total Requests"
           }
         ],
@@ -22,7 +22,8 @@
               "mode": "palette-classic"
             },
             "custom": {
-              "displayMode": "list"
+              "displayMode": "list",
+              "orientation": "auto"
             }
           }
         },
@@ -39,7 +40,7 @@
         "type": "stat",
         "targets": [
           {
-            "expr": "mc_taxi_total_calculations",
+            "expr": "mc_taxi_fare_calculations_total",
             "legendFormat": "Total Calculations"
           }
         ],
@@ -49,7 +50,8 @@
               "mode": "palette-classic"
             },
             "custom": {
-              "displayMode": "list"
+              "displayMode": "list",
+              "orientation": "auto"
             }
           }
         },
@@ -67,7 +69,7 @@
         "targets": [
           {
             "expr": "mc_taxi_average_fare",
-            "legendFormat": "Average Fare (₱)"
+            "legendFormat": "Average Fare (PHP)"
           }
         ],
         "fieldConfig": {
@@ -76,7 +78,8 @@
               "mode": "palette-classic"
             },
             "custom": {
-              "displayMode": "list"
+              "displayMode": "list",
+              "orientation": "auto"
             },
             "unit": "currencyPHP"
           }
@@ -118,8 +121,8 @@
         "type": "graph",
         "targets": [
           {
-            "expr": "rate(mc_taxi_request_duration_seconds_sum[5m]) / rate(mc_taxi_request_duration_seconds_count[5m])",
-            "legendFormat": "Avg Response Time"
+            "expr": "rate(mc_taxi_http_request_duration_seconds_sum[5m]) / rate(mc_taxi_http_request_duration_seconds_count[5m])",
+            "legendFormat": "Response Time"
           }
         ],
         "fieldConfig": {
@@ -143,7 +146,7 @@
         "type": "graph",
         "targets": [
           {
-            "expr": "rate(mc_taxi_total_requests[1m]) * 60",
+            "expr": "rate(mc_taxi_http_requests_total[1m])",
             "legendFormat": "Requests/min"
           }
         ],
@@ -151,7 +154,8 @@
           "defaults": {
             "color": {
               "mode": "palette-classic"
-            }
+            },
+            "unit": "reqps"
           }
         },
         "gridPos": {
@@ -192,7 +196,7 @@
         "type": "graph",
         "targets": [
           {
-            "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100",
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
             "legendFormat": "Memory Usage %"
           }
         ],
@@ -210,120 +214,22 @@
           "x": 12,
           "y": 16
         }
-      },
-      {
-        "id": 9,
-        "title": "EC2 Instance CPU Usage",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{job=\"ec2-instance\",mode=\"idle\"}[5m])) * 100)",
-            "legendFormat": "EC2 CPU Usage %"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "unit": "percent"
-          }
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 24
-        }
-      },
-      {
-        "id": 10,
-        "title": "EC2 Instance Memory Usage",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "(node_memory_MemTotal_bytes{job=\"ec2-instance\"} - node_memory_MemAvailable_bytes{job=\"ec2-instance\"}) / node_memory_MemTotal_bytes{job=\"ec2-instance\"} * 100",
-            "legendFormat": "EC2 Memory Usage %"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "unit": "percent"
-          }
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 12,
-          "y": 24
-        }
-      },
-      {
-        "id": 11,
-        "title": "EC2 Network I/O",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "rate(node_network_receive_bytes_total{job=\"ec2-instance\"}[5m])",
-            "legendFormat": "Network In"
-          },
-          {
-            "expr": "rate(node_network_transmit_bytes_total{job=\"ec2-instance\"}[5m])",
-            "legendFormat": "Network Out"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "unit": "Bps"
-          }
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 32
-        }
-      },
-      {
-        "id": 12,
-        "title": "EC2 Disk I/O",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "rate(node_disk_read_bytes_total{job=\"ec2-instance\"}[5m])",
-            "legendFormat": "Disk Read"
-          },
-          {
-            "expr": "rate(node_disk_written_bytes_total{job=\"ec2-instance\"}[5m])",
-            "legendFormat": "Disk Write"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "unit": "Bps"
-          }
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 12,
-          "y": 32
-        }
       }
     ],
     "time": {
       "from": "now-1h",
       "to": "now"
     },
-    "refresh": "30s"
+    "timepicker": {},
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "refresh": "5s",
+    "schemaVersion": 27,
+    "version": 1,
+    "links": []
   }
 }
