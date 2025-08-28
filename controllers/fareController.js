@@ -1,5 +1,6 @@
 const FareCalculation = require('../models/FareCalculation');
 const AppMetrics = require('../models/AppMetrics');
+const { recordFareCalculation } = require('../middleware/metrics');
 
 const fareController = {
   // Calculate fare based on distance using Philippine taxi fare structure
@@ -32,10 +33,13 @@ const fareController = {
         }
       });
 
-      await calculation.save();
+              await calculation.save();
 
-      // Update metrics
-      await updateMetrics(vehicleType, totalFare);
+        // Update metrics
+        await updateMetrics(vehicleType, totalFare);
+        
+        // Record Prometheus metrics
+        recordFareCalculation(vehicleType, totalFare, true);
 
       res.status(200).json({
         success: true,

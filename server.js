@@ -11,6 +11,7 @@ const healthRoutes = require('./routes/healthRoutes');
 const metricsRoutes = require('./routes/metricsRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const rateLimiter = require('./middleware/rateLimiter');
+const { metricsMiddleware, metricsEndpoint } = require('./middleware/metrics');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -39,10 +40,16 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(rateLimiter);
 
+// Prometheus metrics middleware
+app.use(metricsMiddleware);
+
 // Routes
 app.use('/api', fareRoutes);
 app.use('/api', healthRoutes);
 app.use('/api', metricsRoutes);
+
+// Prometheus metrics endpoint
+app.get('/metrics', metricsEndpoint);
 
 // Root endpoint
 app.get('/', (req, res) => {
