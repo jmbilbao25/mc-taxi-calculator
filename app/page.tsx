@@ -6,7 +6,7 @@ export default function TaxiFareCalculator() {
   const [distance, setDistance] = useState('');
   const [fare, setFare] = useState<number | null>(null);
   const [breakdown, setBreakdown] = useState<string>('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(''); 
 
   const calculateFare = (distanceKm: number): { fare: number; breakdown: string } => {
     let totalFare = 0;
