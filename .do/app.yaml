@@ -1,0 +1,27 @@
+name: fare-calculator-api
+services:
+  - name: api
+    source_dir: /
+    github:
+      repo: your-username/mc-taxi-calculator
+      branch: main
+    run_command: node server.js
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: MONGODB_URI
+        value: mongodb+srv://bilbaojohnmichael_db_user:uitNnMCU2PHPt5Mu@mctaxi.usdejer.mongodb.net/?retryWrites=true&w=majority&appName=MCTAXI
+      - key: DB_NAME
+        value: fare_calculator
+    health_check:
+      http_path: /api/health
+    routes:
+      - path: /
+    alerts:
+      - rule: DEPLOYMENT_FAILED
+      - rule: DOMAIN_FAILED
