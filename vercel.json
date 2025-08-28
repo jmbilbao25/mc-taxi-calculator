@@ -8,10 +8,5 @@
   ],
   "env": {
     "NEXT_PUBLIC_API_URL": "http://13.239.158.3:3001"
-  },
-  "functions": {
-    "app/page.tsx": {
-      "maxDuration": 30
-    }
   }
 }
