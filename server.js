@@ -26,7 +26,8 @@ app.use(cors({
     'http://localhost:3001',
     'https://*.vercel.app',
     'https://mc-taxi-calculator.vercel.app',
-    'https://mc-taxi-calculator-qxk71llvy-jmbilbao25s-projects.vercel.app'
+    'https://mc-taxi-calculator-qxk71llvy-jmbilbao25s-projects.vercel.app',
+    'https://mc-taxi-calculator-git-main-jmbilbao25s-projects.vercel.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

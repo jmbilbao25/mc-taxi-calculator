@@ -11,7 +11,7 @@ export default function TaxiFareCalculator() {
   const [loading, setLoading] = useState(false);
 
   // Use EC2 backend URL - replace with your actual EC2 public IP
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.239.158.3:3001';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.107.78.253:3001'; 
 
   const handleCalculate = async () => {
     setError('');
@@ -39,33 +39,39 @@ export default function TaxiFareCalculator() {
       return;
     }
 
-    try {
-      const response = await fetch(`${API_URL}/api/calculate-fare`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          distance: distanceValue,
-          vehicleType: vehicleType,
-          clientId: 'web-user'
-        }),
-      });
+         try {
+       console.log('Making request to:', `${API_URL}/api/calculate-fare`);
+       const response = await fetch(`${API_URL}/api/calculate-fare`, {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({
+           distance: distanceValue,
+           vehicleType: vehicleType,
+           clientId: 'web-user'
+         }),
+       });
 
-      const data = await response.json();
+       console.log('Response status:', response.status);
+       console.log('Response headers:', response.headers);
 
-      if (data.success) {
-        setFare(data.data.totalFare);
-        setBreakdown(data.data.breakdown);
-      } else {
-        setError(data.message || 'Failed to calculate fare. Please try again.');
-      }
-    } catch (err) {
-      console.error('API Error:', err);
-      setError('Failed to connect to the server. Please check your connection and try again.');
-    } finally {
-      setLoading(false);
-    }
+       const data = await response.json();
+       console.log('Response data:', data);
+
+       if (data.success) {
+         setFare(data.data.totalFare);
+         setBreakdown(data.data.breakdown);
+       } else {
+         setError(data.message || 'Failed to calculate fare. Please try again.');
+       }
+     } catch (err) {
+       console.error('API Error:', err);
+       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+       setError(`Failed to connect to the server: ${errorMessage}. URL: ${API_URL}/api/calculate-fare`);
+     } finally {
+       setLoading(false);
+     }
   };
 
   const handleReset = () => {
