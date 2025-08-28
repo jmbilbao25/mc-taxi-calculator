@@ -81,7 +81,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "mc_taxi_http_requests_total",
+          "expr": "sum(mc_taxi_requests_total)",
           "refId": "A"
         }
       ],
@@ -147,7 +147,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "mc_taxi_fare_calculations_total",
+          "expr": "sum(mc_taxi_fare_calculations_total)",
           "refId": "A"
         }
       ],
@@ -182,7 +182,7 @@
               }
             ]
           },
-          "unit": "currencyPHP"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -214,11 +214,11 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "mc_taxi_average_fare",
+          "expr": "mc_taxi_requests_total",
           "refId": "A"
         }
       ],
-      "title": "Average Fare",
+      "title": "Requests by Endpoint",
       "type": "stat"
     },
     {
@@ -280,11 +280,11 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "mc_taxi_vehicle_type_count",
+          "expr": "mc_taxi_fare_calculations_total",
           "refId": "A"
         }
       ],
-      "title": "Vehicle Type Count",
+      "title": "Fare Calculations by Vehicle Type",
       "type": "stat"
     },
     {
@@ -339,7 +339,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -368,11 +368,11 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(mc_taxi_http_request_duration_seconds_sum[5m]) / rate(mc_taxi_http_request_duration_seconds_count[5m])",
+          "expr": "rate(process_cpu_seconds_total[1m]) * 100",
           "refId": "A"
         }
       ],
-      "title": "API Response Time",
+      "title": "Node.js CPU Usage",
       "type": "timeseries"
     },
     {
@@ -456,11 +456,11 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(mc_taxi_http_requests_total[1m])",
+          "expr": "rate(mc_taxi_requests_total[1m])",
           "refId": "A"
         }
       ],
-      "title": "Requests per Second",
+      "title": "Requests per Minute",
       "type": "timeseries"
     },
     {
@@ -636,10 +636,686 @@
           "refId": "A"
         }
       ],
-      "title": "System Memory Usage",
-      "type": "timeseries"
-    }
-  ],
+             "title": "System Memory Usage",
+       "type": "timeseries"
+     },
+     {
+       "datasource": {
+         "type": "prometheus",
+         "uid": "prometheus"
+       },
+       "fieldConfig": {
+         "defaults": {
+           "color": {
+             "mode": "palette-classic"
+           },
+           "custom": {
+             "axisLabel": "",
+             "axisPlacement": "auto",
+             "barAlignment": 0,
+             "drawStyle": "line",
+             "fillOpacity": 10,
+             "gradientMode": "none",
+             "hideFrom": {
+               "legend": false,
+               "tooltip": false,
+               "vis": false
+             },
+             "lineInterpolation": "linear",
+             "lineWidth": 1,
+             "pointSize": 5,
+             "scaleDistribution": {
+               "type": "linear"
+             },
+             "showPoints": "never",
+             "spanNulls": false,
+             "stacking": {
+               "group": "A",
+               "mode": "none"
+             },
+             "thresholdsStyle": {
+               "mode": "off"
+             }
+           },
+           "mappings": [],
+           "thresholds": {
+             "mode": "absolute",
+             "steps": [
+               {
+                 "color": "green",
+                 "value": null
+               },
+               {
+                 "color": "red",
+                 "value": 80
+               }
+             ]
+           },
+           "unit": "bytes"
+         },
+         "overrides": []
+       },
+       "gridPos": {
+         "h": 8,
+         "w": 12,
+         "x": 0,
+         "y": 24
+       },
+       "id": 9,
+       "options": {
+         "legend": {
+           "calcs": [],
+           "displayMode": "list",
+           "placement": "bottom",
+           "showLegend": true
+         },
+         "tooltip": {
+           "mode": "single",
+           "sort": "none"
+         }
+       },
+       "targets": [
+         {
+           "datasource": {
+             "type": "prometheus",
+             "uid": "prometheus"
+           },
+           "expr": "process_resident_memory_bytes",
+           "refId": "A"
+         }
+       ],
+       "title": "Node.js Process Memory",
+       "type": "timeseries"
+     },
+     {
+       "datasource": {
+         "type": "prometheus",
+         "uid": "prometheus"
+       },
+       "fieldConfig": {
+         "defaults": {
+           "color": {
+             "mode": "palette-classic"
+           },
+           "custom": {
+             "axisLabel": "",
+             "axisPlacement": "auto",
+             "barAlignment": 0,
+             "drawStyle": "line",
+             "fillOpacity": 10,
+             "gradientMode": "none",
+             "hideFrom": {
+               "legend": false,
+               "tooltip": false,
+               "vis": false
+             },
+             "lineInterpolation": "linear",
+             "lineWidth": 1,
+             "pointSize": 5,
+             "scaleDistribution": {
+               "type": "linear"
+             },
+             "showPoints": "never",
+             "spanNulls": false,
+             "stacking": {
+               "group": "A",
+               "mode": "none"
+             },
+             "thresholdsStyle": {
+               "mode": "off"
+             }
+           },
+           "mappings": [],
+           "thresholds": {
+             "mode": "absolute",
+             "steps": [
+               {
+                 "color": "green",
+                 "value": null
+               },
+               {
+                 "color": "red",
+                 "value": 80
+               }
+             ]
+           },
+           "unit": "reqps"
+         },
+         "overrides": []
+       },
+       "gridPos": {
+         "h": 8,
+         "w": 12,
+         "x": 12,
+         "y": 24
+       },
+       "id": 10,
+       "options": {
+         "legend": {
+           "calcs": [],
+           "displayMode": "list",
+           "placement": "bottom",
+           "showLegend": true
+         },
+         "tooltip": {
+           "mode": "single",
+           "sort": "none"
+         }
+       },
+       "targets": [
+         {
+           "datasource": {
+             "type": "prometheus",
+             "uid": "prometheus"
+           },
+           "expr": "rate(mc_taxi_fare_calculations_total[1m])",
+           "refId": "A"
+         }
+       ],
+       "title": "Fare Calculations per Minute",
+       "type": "timeseries"
+     },
+     {
+       "datasource": {
+         "type": "prometheus",
+         "uid": "prometheus"
+       },
+       "fieldConfig": {
+         "defaults": {
+           "color": {
+             "mode": "thresholds"
+           },
+           "mappings": [],
+           "thresholds": {
+             "mode": "absolute",
+             "steps": [
+               {
+                 "color": "green",
+                 "value": null
+               },
+               {
+                 "color": "red",
+                 "value": 80
+               }
+             ]
+           }
+         },
+         "overrides": []
+       },
+       "gridPos": {
+         "h": 8,
+         "w": 8,
+         "x": 0,
+         "y": 32
+       },
+       "id": 11,
+       "options": {
+         "colorMode": "value",
+         "graphMode": "area",
+         "justifyMode": "auto",
+         "orientation": "auto",
+         "reduceOptions": {
+           "calcs": [
+             "lastNotNull"
+           ],
+           "fields": "",
+           "values": false
+         },
+         "textMode": "auto"
+       },
+       "pluginVersion": "10.0.0",
+       "targets": [
+         {
+           "datasource": {
+             "type": "prometheus",
+             "uid": "prometheus"
+           },
+           "expr": "process_open_fds",
+           "refId": "A"
+         }
+       ],
+       "title": "Open File Descriptors",
+       "type": "stat"
+     },
+     {
+       "datasource": {
+         "type": "prometheus",
+         "uid": "prometheus"
+       },
+       "fieldConfig": {
+         "defaults": {
+           "color": {
+             "mode": "thresholds"
+           },
+           "mappings": [],
+           "thresholds": {
+             "mode": "absolute",
+             "steps": [
+               {
+                 "color": "green",
+                 "value": null
+               },
+               {
+                 "color": "yellow",
+                 "value": 30
+               },
+               {
+                 "color": "red",
+                 "value": 60
+               }
+             ]
+           },
+           "unit": "s"
+         },
+         "overrides": []
+       },
+       "gridPos": {
+         "h": 8,
+         "w": 8,
+         "x": 8,
+         "y": 32
+       },
+       "id": 12,
+       "options": {
+         "colorMode": "value",
+         "graphMode": "area",
+         "justifyMode": "auto",
+         "orientation": "auto",
+         "reduceOptions": {
+           "calcs": [
+             "lastNotNull"
+           ],
+           "fields": "",
+           "values": false
+         },
+         "textMode": "auto"
+       },
+       "pluginVersion": "10.0.0",
+       "targets": [
+         {
+           "datasource": {
+             "type": "prometheus",
+             "uid": "prometheus"
+           },
+           "expr": "process_start_time_seconds",
+           "refId": "A"
+         }
+       ],
+       "title": "Process Start Time",
+       "type": "stat"
+     },
+     {
+       "datasource": {
+         "type": "prometheus",
+         "uid": "prometheus"
+       },
+       "fieldConfig": {
+         "defaults": {
+           "color": {
+             "mode": "thresholds"
+           },
+           "mappings": [],
+           "thresholds": {
+             "mode": "absolute",
+             "steps": [
+               {
+                 "color": "green",
+                 "value": null
+               },
+               {
+                 "color": "yellow",
+                 "value": 50
+               },
+               {
+                 "color": "red",
+                 "value": 80
+               }
+             ]
+           },
+           "unit": "s"
+         },
+         "overrides": []
+       },
+       "gridPos": {
+         "h": 8,
+         "w": 8,
+         "x": 16,
+         "y": 32
+       },
+       "id": 13,
+       "options": {
+         "colorMode": "value",
+         "graphMode": "area",
+         "justifyMode": "auto",
+         "orientation": "auto",
+         "reduceOptions": {
+           "calcs": [
+             "lastNotNull"
+           ],
+           "fields": "",
+           "values": false
+         },
+         "textMode": "auto"
+       },
+       "pluginVersion": "10.0.0",
+       "targets": [
+         {
+           "datasource": {
+             "type": "prometheus",
+             "uid": "prometheus"
+           },
+           "expr": "time() - process_start_time_seconds",
+           "refId": "A"
+         }
+       ],
+       "title": "Process Uptime",
+       "type": "stat"
+     },
+     {
+       "datasource": {
+         "type": "prometheus",
+         "uid": "prometheus"
+       },
+       "fieldConfig": {
+         "defaults": {
+           "color": {
+             "mode": "palette-classic"
+           },
+           "custom": {
+             "hideFrom": {
+               "legend": false,
+               "tooltip": false,
+               "vis": false
+             }
+           },
+           "mappings": []
+         },
+         "overrides": []
+       },
+       "gridPos": {
+         "h": 8,
+         "w": 12,
+         "x": 0,
+         "y": 40
+       },
+       "id": 14,
+       "options": {
+         "legend": {
+           "displayMode": "visible",
+           "placement": "bottom",
+           "showLegend": true
+         },
+         "pieType": "pie",
+         "reduceOptions": {
+           "calcs": [
+             "lastNotNull"
+           ],
+           "fields": "",
+           "values": false
+         },
+         "tooltip": {
+           "mode": "single",
+           "sort": "none"
+         }
+       },
+       "targets": [
+         {
+           "datasource": {
+             "type": "prometheus",
+             "uid": "prometheus"
+           },
+           "expr": "mc_taxi_requests_total",
+           "refId": "A"
+         }
+       ],
+       "title": "Request Distribution by Endpoint",
+       "type": "piechart"
+     },
+     {
+       "datasource": {
+         "type": "prometheus",
+         "uid": "prometheus"
+       },
+       "fieldConfig": {
+         "defaults": {
+           "color": {
+             "mode": "palette-classic"
+           },
+           "custom": {
+             "hideFrom": {
+               "legend": false,
+               "tooltip": false,
+               "vis": false
+             }
+           },
+           "mappings": []
+         },
+         "overrides": []
+       },
+       "gridPos": {
+         "h": 8,
+         "w": 12,
+         "x": 12,
+         "y": 40
+       },
+       "id": 15,
+       "options": {
+         "legend": {
+           "displayMode": "visible",
+           "placement": "bottom",
+           "showLegend": true
+         },
+         "pieType": "pie",
+         "reduceOptions": {
+           "calcs": [
+             "lastNotNull"
+           ],
+           "fields": "",
+           "values": false
+         },
+         "tooltip": {
+           "mode": "single",
+           "sort": "none"
+         }
+       },
+       "targets": [
+         {
+           "datasource": {
+             "type": "prometheus",
+             "uid": "prometheus"
+           },
+           "expr": "mc_taxi_fare_calculations_total",
+           "refId": "A"
+         }
+       ],
+       "title": "Fare Calculations by Vehicle Type",
+       "type": "piechart"
+     },
+     {
+       "datasource": {
+         "type": "prometheus",
+         "uid": "prometheus"
+       },
+       "fieldConfig": {
+         "defaults": {
+           "color": {
+             "mode": "palette-classic"
+           },
+           "custom": {
+             "axisLabel": "",
+             "axisPlacement": "auto",
+             "barAlignment": 0,
+             "drawStyle": "line",
+             "fillOpacity": 10,
+             "gradientMode": "none",
+             "hideFrom": {
+               "legend": false,
+               "tooltip": false,
+               "vis": false
+             },
+             "lineInterpolation": "linear",
+             "lineWidth": 1,
+             "pointSize": 5,
+             "scaleDistribution": {
+               "type": "linear"
+             },
+             "showPoints": "never",
+             "spanNulls": false,
+             "stacking": {
+               "group": "A",
+               "mode": "none"
+             },
+             "thresholdsStyle": {
+               "mode": "off"
+             }
+           },
+           "mappings": [],
+           "thresholds": {
+             "mode": "absolute",
+             "steps": [
+               {
+                 "color": "green",
+                 "value": null
+               },
+               {
+                 "color": "red",
+                 "value": 80
+               }
+             ]
+           },
+           "unit": "bytes"
+         },
+         "overrides": []
+       },
+       "gridPos": {
+         "h": 8,
+         "w": 12,
+         "x": 0,
+         "y": 48
+       },
+       "id": 16,
+       "options": {
+         "legend": {
+           "calcs": [],
+           "displayMode": "list",
+           "placement": "bottom",
+           "showLegend": true
+         },
+         "tooltip": {
+           "mode": "single",
+           "sort": "none"
+         }
+       },
+       "targets": [
+         {
+           "datasource": {
+             "type": "prometheus",
+             "uid": "prometheus"
+           },
+           "expr": "nodejs_heap_size_total_bytes",
+           "refId": "A"
+         },
+         {
+           "datasource": {
+             "type": "prometheus",
+             "uid": "prometheus"
+           },
+           "expr": "nodejs_heap_size_used_bytes",
+           "refId": "B"
+         }
+       ],
+       "title": "Node.js Heap Memory Usage",
+       "type": "timeseries"
+     },
+     {
+       "datasource": {
+         "type": "prometheus",
+         "uid": "prometheus"
+       },
+       "fieldConfig": {
+         "defaults": {
+           "color": {
+             "mode": "palette-classic"
+           },
+           "custom": {
+             "axisLabel": "",
+             "axisPlacement": "auto",
+             "barAlignment": 0,
+             "drawStyle": "line",
+             "fillOpacity": 10,
+             "gradientMode": "none",
+             "hideFrom": {
+               "legend": false,
+               "tooltip": false,
+               "vis": false
+             },
+             "lineInterpolation": "linear",
+             "lineWidth": 1,
+             "pointSize": 5,
+             "scaleDistribution": {
+               "type": "linear"
+             },
+             "showPoints": "never",
+             "spanNulls": false,
+             "stacking": {
+               "group": "A",
+               "mode": "none"
+             },
+             "thresholdsStyle": {
+               "mode": "off"
+             }
+           },
+           "mappings": [],
+           "thresholds": {
+             "mode": "absolute",
+             "steps": [
+               {
+                 "color": "green",
+                 "value": null
+               },
+               {
+                 "color": "red",
+                 "value": 80
+               }
+             ]
+           },
+           "unit": "short"
+         },
+         "overrides": []
+       },
+       "gridPos": {
+         "h": 8,
+         "w": 12,
+         "x": 12,
+         "y": 48
+       },
+       "id": 17,
+       "options": {
+         "legend": {
+           "calcs": [],
+           "displayMode": "list",
+           "placement": "bottom",
+           "showLegend": true
+         },
+         "tooltip": {
+           "mode": "single",
+           "sort": "none"
+         }
+       },
+       "targets": [
+         {
+           "datasource": {
+             "type": "prometheus",
+             "uid": "prometheus"
+           },
+           "expr": "rate(nodejs_gc_duration_seconds_count[1m])",
+           "refId": "A"
+         }
+       ],
+       "title": "Node.js Garbage Collection Rate",
+       "type": "timeseries"
+     }
+   ],
   "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",

@@ -1,202 +1,331 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calculator, MapPin, Car, Bike, Moon, Sun, Sparkles } from 'lucide-react';
+import { Modal } from './components/ui/Modal';
+import { MonitoringModal } from './components/ui/MonitoringModal';
+import Header from './components/Header';
+import VehicleSelector from './components/VehicleSelector';
+import DistanceInput from './components/DistanceInput';
+import ErrorMessage from './components/ErrorMessage';
+import CalculateButton from './components/CalculateButton';
+import FareResult from './components/FareResult';
+import ResetButton from './components/ResetButton';
+import Footer from './components/Footer';
+import { useFareCalculator } from './hooks/useFareCalculator';
+import { cn } from './lib/utils';
 
 export default function TaxiFareCalculator() {
-  const [distance, setDistance] = useState('');
-  const [vehicleType, setVehicleType] = useState('motorcycle');
-  const [fare, setFare] = useState<number | null>(null);
-  const [breakdown, setBreakdown] = useState<string>('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [showComingSoonModal, setShowComingSoonModal] = useState(false);
+  const [showMonitoringModal, setShowMonitoringModal] = useState(false);
+  const [logoClickCount, setLogoClickCount] = useState(0);
+  const [lastClickTime, setLastClickTime] = useState(0);
 
-  // Use EC2 backend URL - replace with your actual EC2 public IP
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.211.151.184:3001';
-  
-  // Ensure API_URL is always an absolute URL
-  const getApiUrl = (endpoint: string) => {
-    const baseUrl = API_URL.startsWith('http') ? API_URL : `http://${API_URL}`;
-    return `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
-  }; 
+  const {
+    distance,
+    vehicleType,
+    fare,
+    breakdown,
+    error,
+    loading,
+    setDistance,
+    setVehicleType,
+    calculateFare: originalCalculateFare,
+    reset,
+    canCalculate,
+    showReset
+  } = useFareCalculator();
 
-  const handleCalculate = async () => {
-    setError('');
-    setFare(null);
-    setBreakdown('');
-    setLoading(true);
+  const handleCalculateFare = () => {
+    if (vehicleType === 'car') {
+      setShowComingSoonModal(true);
+      return;
+    }
+    originalCalculateFare();
+  };
 
-    const distanceValue = parseFloat(distance);
+  const handleLogoClick = () => {
+    const currentTime = Date.now();
+    const timeDiff = currentTime - lastClickTime;
     
-    if (isNaN(distanceValue) || distanceValue <= 0) {
-      setError('Please enter a valid positive distance.');
-      setLoading(false);
-      return;
+    // Reset counter if more than 3 seconds between clicks
+    // TODO: Maybe make this configurable
+    if (timeDiff > 3000) {
+      setLogoClickCount(1);
+    } else {
+      setLogoClickCount(prev => prev + 1);
     }
-
-    if (distanceValue < 1) {
-      setError('Minimum distance is 1km.');
-      setLoading(false);
-      return;
+    
+    setLastClickTime(currentTime);
+    
+    // Easter egg: Open monitoring modal after 7 quick clicks
+    if (logoClickCount >= 6) {
+      setShowMonitoringModal(true);
+      setLogoClickCount(0);
+      setLastClickTime(0);
+      // Could add some haptic feedback here for mobile
     }
-
-    if (distanceValue > 100) {
-      setError('Distance cannot exceed 100km.');
-      setLoading(false);
-      return;
-    }
-
-         try {
-       const apiUrl = getApiUrl('/api/calculate-fare');
-       console.log('Making request to:', apiUrl);
-       const response = await fetch(apiUrl, {
-         method: 'POST',
-         headers: {
-           'Content-Type': 'application/json',
-         },
-         body: JSON.stringify({
-           distance: distanceValue,
-           vehicleType: vehicleType,
-           clientId: 'web-user'
-         }),
-       });
-
-       console.log('Response status:', response.status);
-       console.log('Response headers:', response.headers);
-
-       const data = await response.json();
-       console.log('Response data:', data);
-
-       if (data.success) {
-         setFare(data.data.totalFare);
-         setBreakdown(data.data.breakdown);
-       } else {
-         setError(data.message || 'Failed to calculate fare. Please try again.');
-       }
-     } catch (err) {
-       console.error('API Error:', err);
-       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-       setError(`Failed to connect to the server: ${errorMessage}. URL: ${getApiUrl('/api/calculate-fare')}`);
-     } finally {
-       setLoading(false);
-     }
   };
 
-  const handleReset = () => {
-    setDistance('');
-    setVehicleType('motorcycle');
-    setFare(null);
-    setBreakdown('');
-    setError('');
+  useEffect(() => {
+    setMounted(true);
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(isDark);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   };
+
+  if (!mounted) {
+    return null; // Prevent hydration mismatch
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">MC Taxi</h1>
-          <h2 className="text-xl font-semibold text-gray-600">Fare Calculator</h2>
-        </div>
-
-        <div className="space-y-6">
-          {/* Vehicle Type Selection */}
-          <div>
-            <label htmlFor="vehicleType" className="block text-sm font-medium text-gray-700 mb-2">
-              Vehicle Type
-            </label>
-            <select
-              id="vehicleType"
-              value={vehicleType}
-              onChange={(e) => setVehicleType(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg text-gray-900"
-            >
-              <option value="motorcycle">Motorcycle</option>
-              <option value="car">Car</option>
-            </select>
-          </div>
-
-          {/* Input Section */}
-          <div>
-            <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
-              Distance (kilometers)
-            </label>
-            <input
-              type="number"
-              id="distance"
-              value={distance}
-              onChange={(e) => setDistance(e.target.value)}
-              placeholder="Enter distance (e.g., 5.5)"
-              step="0.01"
-              min="1"
-              max="100"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg text-gray-900"
-            />
-          </div>
-
-          {/* Error Display */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          )}
-
-          {/* Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={handleCalculate}
-              disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
-            >
-              {loading ? 'Calculating...' : 'Calculate Fare'}
-            </button>
-            <button
-              onClick={handleReset}
-              disabled={loading}
-              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 disabled:bg-gray-100 transition-colors duration-200"
-            >
-              Reset
-            </button>
-          </div>
-
-          {/* Results */}
-          {fare !== null && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Total Fare</h3>
-                <div className="text-3xl font-bold text-green-600">
-                  ₱{fare.toFixed(2)}
-                </div>
-                <div className="text-sm text-gray-600 mt-1">
-                  Vehicle: {vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1)}
-                </div>
-              </div>
-              
-              <div className="border-t border-green-200 pt-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">Fare Breakdown:</h4>
-                <div className="text-sm text-gray-600 whitespace-pre-line">
-                  {breakdown}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Fare Structure Info */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Fare Structure:</h3>
-            <div className="text-xs text-gray-600 space-y-1">
-              <div>• 1-2km: ₱50.00 (base fare)</div>
-              <div>• 3-8km: ₱50.00 + ₱10.00/km</div>
-              <div>• 9km+: ₱50.00 + ₱60.00 + ₱12.00/km</div>
-            </div>
-          </div>
-
-          {/* API Status */}
-          <div className="text-center">
-            <p className="text-xs text-gray-500">
-              Powered by MC Taxi API (EC2)
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-blue-950 dark:to-purple-950 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse-gentle" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse-gentle" />
       </div>
+
+      {/* Dark mode toggle */}
+      <motion.button
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.5 }}
+        onClick={toggleDarkMode}
+        className="fixed top-6 right-6 z-50 p-3 rounded-full glass-effect hover:scale-110 transition-all duration-300 group"
+      >
+        {darkMode ? (
+          <Sun className="h-5 w-5 text-yellow-500 group-hover:rotate-12 transition-transform" />
+        ) : (
+          <Moon className="h-5 w-5 text-blue-600 group-hover:-rotate-12 transition-transform" />
+        )}
+      </motion.button>
+
+      <div className="relative flex items-center justify-center min-h-screen p-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full max-w-lg"
+        >
+          {/* Main Card */}
+          <div className="glass-effect rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl border border-white/20 dark:border-gray-700/30">
+            
+            {/* Header with enhanced design */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 dark:from-blue-800 dark:via-blue-900 dark:to-purple-900 text-white p-8 text-center overflow-hidden"
+            >
+              <div className="absolute inset-0 opacity-30" style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+              }} />
+              
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                className="relative"
+              >
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <Calculator className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="relative">
+                    <h1 
+                      className="text-3xl font-bold font-display cursor-pointer select-none hover:scale-105 transition-transform duration-200"
+                      onClick={handleLogoClick}
+                      title="MC Taxi"
+                    >
+                      MC Taxi
+                    </h1>
+                    {logoClickCount > 0 && logoClickCount < 7 && (
+                      <div className="absolute -top-2 -right-2">
+                        <div className="flex gap-1">
+                          {Array.from({ length: 7 }, (_, i) => (
+                            <div
+                              key={i}
+                              className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                                i < logoClickCount 
+                                  ? 'bg-yellow-400 scale-110' 
+                                  : 'bg-white/30 scale-75'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <Sparkles className="h-6 w-6 text-yellow-300 animate-pulse" />
+                </div>
+                <p className="text-blue-100 text-lg font-medium font-display">Smart Fare Calculator</p>
+              </motion.div>
+            </motion.div>
+
+            {/* Content */}
+            <div className="p-8 space-y-8">
+              
+              {/* Enhanced Vehicle Selector */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <VehicleSelector 
+                  selectedVehicle={vehicleType} 
+                  onVehicleChange={setVehicleType} 
+                />
+              </motion.div>
+
+              {/* Enhanced Distance Input */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <DistanceInput 
+                  distance={distance} 
+                  onDistanceChange={setDistance}
+                  disabled={loading}
+                />
+              </motion.div>
+
+              {/* Error Message */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                  >
+                    <ErrorMessage message={error} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Calculate Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                               <CalculateButton 
+                 onClick={handleCalculateFare}
+                 loading={loading}
+                 disabled={!canCalculate}
+               />
+              </motion.div>
+
+              {/* Fare Result */}
+              <AnimatePresence>
+                {fare !== null && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -30, scale: 0.9 }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                  >
+                    <FareResult 
+                      fare={fare}
+                      distance={distance}
+                      vehicleType={vehicleType}
+                      breakdown={breakdown}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Reset Button */}
+              <AnimatePresence>
+                {showReset && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <ResetButton onClick={reset} show={showReset} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+            </div>
+
+            {/* Enhanced Footer */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+            >
+              <Footer message="Base fare: ₱50 • Rate: ₱10-12/km" />
+            </motion.div>
+          </div>
+
+          {/* Stats or additional info */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+            className="mt-6 text-center text-muted-foreground"
+          >
+            <p className="text-sm flex items-center justify-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Accurate fare calculation for Metro Manila
+            </p>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Coming Soon Modal */}
+      <Modal
+        isOpen={showComingSoonModal}
+        onClose={() => setShowComingSoonModal(false)}
+        title="🚗 Car Calculations"
+      >
+        <div className="text-center space-y-4">
+          <div className="text-6xl mb-4">🚧</div>
+          <h3 className="text-xl font-bold font-display text-foreground mb-2">
+            Coming Soon!
+          </h3>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Car fare calculations are currently under development. We're working hard to bring you this feature soon!
+          </p>
+          <p className="text-sm text-primary font-medium">
+            For now, please use <strong>Motorcycle</strong> for your fare calculations.
+          </p>
+          <div className="pt-4">
+            <button
+              onClick={() => setShowComingSoonModal(false)}
+              className="w-full py-3 px-6 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-colors"
+            >
+              Got it!
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Hidden Monitoring Modal */}
+      <MonitoringModal
+        isOpen={showMonitoringModal}
+        onClose={() => setShowMonitoringModal(false)}
+      />
     </div>
   );
 }
