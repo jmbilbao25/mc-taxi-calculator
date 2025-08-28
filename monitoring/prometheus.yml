@@ -1,0 +1,48 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # MC Taxi API metrics
+  - job_name: 'mc-taxi-api'
+    static_configs:
+      - targets: ['host.docker.internal:3001']
+    metrics_path: '/api/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Node Exporter - System metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+      
+  # AWS EC2 Instance
+  - job_name: 'ec2-instance'
+    static_configs:
+      - targets: ['YOUR_EC2_PUBLIC_IP:9100']  # Replace with your EC2 IP
+    scrape_interval: 30s
+
+  # cAdvisor - Container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # Grafana
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+      
+  # AWS CloudWatch (requires cloudwatch_exporter)
+  # - job_name: 'cloudwatch'
+  #   static_configs:
+  #     - targets: ['cloudwatch-exporter:9106']
+  #   scrape_interval: 60s

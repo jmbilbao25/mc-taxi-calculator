@@ -7,11 +7,6 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_API_URL": "http://13.239.158.3:3001"
-  },
-  "functions": {
-    "app/page.tsx": {
-      "maxDuration": 30
-    }
+    "NEXT_PUBLIC_API_URL": "http://3.107.78.253:3001"
   }
 }
