@@ -2,19 +2,16 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/server.js"
+      "src": "package.json",
+      "use": "@vercel/next"
     }
   ],
   "env": {
-    "NODE_ENV": "production",
-    "MONGODB_URI": "mongodb+srv://bilbaojohnmichael_db_user:uitNnMCU2PHPt5Mu@mctaxi.usdejer.mongodb.net/?retryWrites=true&w=majority&appName=MCTAXI",
-    "DB_NAME": "fare_calculator"
+    "NEXT_PUBLIC_API_URL": "http://13.239.158.3:3001"
+  },
+  "functions": {
+    "app/page.tsx": {
+      "maxDuration": 30
+    }
   }
 }

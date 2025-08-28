@@ -4,66 +4,73 @@ import { useState } from 'react';
 
 export default function TaxiFareCalculator() {
   const [distance, setDistance] = useState('');
+  const [vehicleType, setVehicleType] = useState('motorcycle');
   const [fare, setFare] = useState<number | null>(null);
   const [breakdown, setBreakdown] = useState<string>('');
-  const [error, setError] = useState(''); 
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const calculateFare = (distanceKm: number): { fare: number; breakdown: string } => {
-    let totalFare = 0;
-    let breakdownText = '';
+  // Use EC2 backend URL - replace with your actual EC2 public IP
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.239.158.3:3001';
 
-    if (distanceKm >= 1 && distanceKm <= 2) {
-      // 1km to 2km: 50 pesos (base fare)
-      totalFare = 50;
-      breakdownText = `Base fare (1-2km): ₱50.00`;
-    } else if (distanceKm >= 3 && distanceKm <= 8) {
-      // 3km to 8km: 50 pesos base + (distance - 2) × 10 pesos
-      const additionalKm = distanceKm - 2;
-      const additionalFare = additionalKm * 10;
-      totalFare = 50 + additionalFare;
-      breakdownText = `Base fare: ₱50.00\nAdditional ${additionalKm.toFixed(2)}km × ₱10.00 = ₱${additionalFare.toFixed(2)}`;
-    } else if (distanceKm >= 9) {
-      // 9km and above: 50 pesos base + (6 × 10 pesos) + (distance - 8) × 12 pesos
-      const tier1Km = 6; // 3-8km range (6km total)
-      const tier1Fare = tier1Km * 10;
-      const tier2Km = distanceKm - 8;
-      const tier2Fare = tier2Km * 12;
-      totalFare = 50 + tier1Fare + tier2Fare;
-      breakdownText = `Base fare: ₱50.00\n3-8km (${tier1Km}km) × ₱10.00 = ₱${tier1Fare.toFixed(2)}\n9km+ (${tier2Km.toFixed(2)}km) × ₱12.00 = ₱${tier2Fare.toFixed(2)}`;
-    }
-
-    return { fare: totalFare, breakdown: breakdownText };
-  };
-
-  const handleCalculate = () => {
+  const handleCalculate = async () => {
     setError('');
     setFare(null);
     setBreakdown('');
+    setLoading(true);
 
     const distanceValue = parseFloat(distance);
     
     if (isNaN(distanceValue) || distanceValue <= 0) {
       setError('Please enter a valid positive distance.');
+      setLoading(false);
       return;
     }
 
     if (distanceValue < 1) {
       setError('Minimum distance is 1km.');
+      setLoading(false);
       return;
     }
 
     if (distanceValue > 100) {
       setError('Distance cannot exceed 100km.');
+      setLoading(false);
       return;
     }
 
-    const result = calculateFare(distanceValue);
-    setFare(result.fare);
-    setBreakdown(result.breakdown);
+    try {
+      const response = await fetch(`${API_URL}/api/calculate-fare`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          distance: distanceValue,
+          vehicleType: vehicleType,
+          clientId: 'web-user'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setFare(data.data.totalFare);
+        setBreakdown(data.data.breakdown);
+      } else {
+        setError(data.message || 'Failed to calculate fare. Please try again.');
+      }
+    } catch (err) {
+      console.error('API Error:', err);
+      setError('Failed to connect to the server. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReset = () => {
     setDistance('');
+    setVehicleType('motorcycle');
     setFare(null);
     setBreakdown('');
     setError('');
@@ -78,6 +85,22 @@ export default function TaxiFareCalculator() {
         </div>
 
         <div className="space-y-6">
+          {/* Vehicle Type Selection */}
+          <div>
+            <label htmlFor="vehicleType" className="block text-sm font-medium text-gray-700 mb-2">
+              Vehicle Type
+            </label>
+            <select
+              id="vehicleType"
+              value={vehicleType}
+              onChange={(e) => setVehicleType(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg text-gray-900"
+            >
+              <option value="motorcycle">Motorcycle</option>
+              <option value="car">Car</option>
+            </select>
+          </div>
+
           {/* Input Section */}
           <div>
             <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
@@ -107,13 +130,15 @@ export default function TaxiFareCalculator() {
           <div className="flex gap-3">
             <button
               onClick={handleCalculate}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+              disabled={loading}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
             >
-              Calculate Fare
+              {loading ? 'Calculating...' : 'Calculate Fare'}
             </button>
             <button
               onClick={handleReset}
-              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200"
+              disabled={loading}
+              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 disabled:bg-gray-100 transition-colors duration-200"
             >
               Reset
             </button>
@@ -126,6 +151,9 @@ export default function TaxiFareCalculator() {
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Total Fare</h3>
                 <div className="text-3xl font-bold text-green-600">
                   ₱{fare.toFixed(2)}
+                </div>
+                <div className="text-sm text-gray-600 mt-1">
+                  Vehicle: {vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1)}
                 </div>
               </div>
               
@@ -146,6 +174,13 @@ export default function TaxiFareCalculator() {
               <div>• 3-8km: ₱50.00 + ₱10.00/km</div>
               <div>• 9km+: ₱50.00 + ₱60.00 + ₱12.00/km</div>
             </div>
+          </div>
+
+          {/* API Status */}
+          <div className="text-center">
+            <p className="text-xs text-gray-500">
+              Powered by MC Taxi API (EC2)
+            </p>
           </div>
         </div>
       </div>
