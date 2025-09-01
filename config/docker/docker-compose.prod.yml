@@ -30,7 +30,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/fare_calculator?authSource=admin
+      MONGODB_URI: mongodb+srv://bilbaojohnmichael_db_user:uitNnMCU2PHPt5Mu@mctaxi.usdejer.mongodb.net/?retryWrites=true&w=majority&appName=MCTAXI
       DB_NAME: fare_calculator
     ports:
       - "3001:3001"
