@@ -229,4 +229,54 @@ router.post('/vehicles', async (req, res) => {
   }
 });
 
+// Delete vehicle type
+router.delete('/vehicles/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Validate ID parameter
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid vehicle ID provided'
+      });
+    }
+    
+    const fareConfig = new FareConfig();
+    const deleted = await fareConfig.deleteVehicleType(id);
+    await fareConfig.close();
+    
+    res.json({
+      success: true,
+      data: deleted,
+      message: 'Vehicle type deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting vehicle type:', error);
+    
+    // Handle specific error cases
+    if (error.message.includes('not found')) {
+      return res.status(404).json({
+        success: false,
+        error: 'Vehicle type not found',
+        details: error.message
+      });
+    }
+    
+    if (error.message.includes('Cannot delete')) {
+      return res.status(409).json({
+        success: false,
+        error: 'Cannot delete vehicle type',
+        details: error.message
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete vehicle type',
+      details: error.message
+    });
+  }
+});
+
 module.exports = router;

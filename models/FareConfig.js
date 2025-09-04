@@ -245,6 +245,56 @@ class FareConfig {
     }
   }
 
+  // Delete vehicle type (soft delete)
+  async deleteVehicleType(id) {
+    try {
+      // First check if the vehicle type exists
+      const existsQuery = `
+        SELECT id, name, display_name, is_active 
+        FROM vehicle_types 
+        WHERE id = $1
+      `;
+      const existsResult = await this.pool.query(existsQuery, [id]);
+      
+      if (existsResult.rows.length === 0) {
+        throw new Error('Vehicle type not found');
+      }
+      
+      const vehicle = existsResult.rows[0];
+      
+      // Check if already deleted
+      if (!vehicle.is_active) {
+        throw new Error('Vehicle type is already deleted');
+      }
+      
+      // Check if there are any fare configs using this vehicle type
+      const checkQuery = `
+        SELECT COUNT(*) as count 
+        FROM fare_config 
+        WHERE vehicle_type = $1 AND is_active = true
+      `;
+      const checkResult = await this.pool.query(checkQuery, [vehicle.name]);
+      
+      if (parseInt(checkResult.rows[0].count) > 0) {
+        throw new Error('Cannot delete vehicle type. There are active fare configurations using this vehicle type.');
+      }
+
+      // Soft delete the vehicle type
+      const query = `
+        UPDATE vehicle_types 
+        SET is_active = false
+        WHERE id = $1
+        RETURNING *
+      `;
+      const result = await this.pool.query(query, [id]);
+      
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error deleting vehicle type:', error);
+      throw error;
+    }
+  }
+
   // Close database connection
   async close() {
     await this.pool.end();

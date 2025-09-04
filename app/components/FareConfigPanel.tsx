@@ -7,10 +7,10 @@ import { Settings, Edit, Plus, Trash2, Save, X, DollarSign, MapPin, Car, Bike, T
 interface FareConfig {
   id: number;
   vehicle_type: string;
-  min_distance: number;
-  max_distance: number;
-  base_price: number;
-  price_per_km: number;
+  min_distance: number | string;
+  max_distance: number | string;
+  base_price: number | string;
+  price_per_km: number | string;
   vehicle_display_name: string;
   icon: string;
   is_active: boolean;
@@ -27,10 +27,13 @@ interface VehicleType {
 const FareConfigPanel = () => {
   const [configs, setConfigs] = useState<FareConfig[]>([]);
   const [vehicles, setVehicles] = useState<VehicleType[]>([]);
+  const [selectedVehicle, setSelectedVehicle] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showAddVehicleForm, setShowAddVehicleForm] = useState(false);
+  const [showDeleteVehicleModal, setShowDeleteVehicleModal] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState<VehicleType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -68,9 +71,13 @@ const FareConfigPanel = () => {
       const response = await fetch(`${API_BASE}/api/fare-config/configs`);
       const data = await response.json();
       if (data.success) {
+        console.log('Fetched configs:', data.data);
         setConfigs(data.data);
+      } else {
+        setError(data.error || 'Failed to fetch fare configurations');
       }
     } catch (error) {
+      console.error('Error fetching configs:', error);
       setError('Failed to fetch fare configurations');
     } finally {
       setLoading(false);
@@ -82,9 +89,17 @@ const FareConfigPanel = () => {
       const response = await fetch(`${API_BASE}/api/fare-config/vehicles`);
       const data = await response.json();
       if (data.success) {
+        console.log('Fetched vehicles:', data.data);
         setVehicles(data.data);
+        // Auto-select first vehicle if none selected
+        if (data.data.length > 0 && !selectedVehicle) {
+          setSelectedVehicle(data.data[0].name);
+        }
+      } else {
+        setError(data.error || 'Failed to fetch vehicle types');
       }
     } catch (error) {
+      console.error('Error fetching vehicles:', error);
       setError('Failed to fetch vehicle types');
     }
   };
@@ -92,10 +107,10 @@ const FareConfigPanel = () => {
   const handleEdit = (config: FareConfig) => {
     setEditingId(config.id);
     setEditForm({
-      min_distance: config.min_distance,
-      max_distance: config.max_distance,
-      base_price: config.base_price,
-      price_per_km: config.price_per_km
+      min_distance: typeof config.min_distance === 'string' ? parseFloat(config.min_distance) : config.min_distance,
+      max_distance: typeof config.max_distance === 'string' ? parseFloat(config.max_distance) : config.max_distance,
+      base_price: typeof config.base_price === 'string' ? parseFloat(config.base_price) : config.base_price,
+      price_per_km: typeof config.price_per_km === 'string' ? parseFloat(config.price_per_km) : config.price_per_km
     });
   };
 
@@ -198,6 +213,45 @@ const FareConfigPanel = () => {
     }
   };
 
+  const handleDeleteVehicle = async () => {
+    if (!vehicleToDelete) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/fare-config/vehicles/${vehicleToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setSuccess('Vehicle type deleted successfully');
+        setShowDeleteVehicleModal(false);
+        setVehicleToDelete(null);
+        
+        // If the deleted vehicle was selected, clear selection
+        if (selectedVehicle === vehicleToDelete.name) {
+          setSelectedVehicle('');
+        }
+        
+        fetchVehicles();
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        // Handle specific error cases
+        let errorMessage = data.error || 'Failed to delete vehicle type';
+        if (data.details) {
+          errorMessage += `: ${data.details}`;
+        }
+        setError(errorMessage);
+      }
+    } catch (error) {
+      setError('Network error: Failed to delete vehicle type');
+    }
+  };
+
+  const openDeleteVehicleModal = (vehicle: VehicleType) => {
+    setVehicleToDelete(vehicle);
+    setShowDeleteVehicleModal(true);
+  };
+
   const getVehicleIcon = (icon: string) => {
     switch (icon) {
       case 'car': return <Car className="w-5 h-5" />;
@@ -208,7 +262,10 @@ const FareConfigPanel = () => {
     }
   };
 
-  const formatPrice = (price: number) => `₱${price.toFixed(2)}`;
+  const formatPrice = (price: number | string) => {
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+    return `₱${isNaN(numPrice) ? '0.00' : numPrice.toFixed(2)}`;
+  };
 
   if (loading) {
     return (
@@ -218,40 +275,83 @@ const FareConfigPanel = () => {
     );
   }
 
+  // Get filtered configs for selected vehicle
+  const filteredConfigs = configs.filter(config => config.vehicle_type === selectedVehicle);
+  const selectedVehicleData = vehicles.find(v => v.name === selectedVehicle);
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="text-center"
       >
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center justify-center space-x-3 mb-6">
           <Settings className="w-8 h-8 text-blue-600" />
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Fare Configuration Panel
           </h1>
         </div>
-        <div className="flex space-x-3">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowAddVehicleForm(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Add New Service</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowAddForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Add New Configuration</span>
-          </motion.button>
+        
+        {/* Vehicle Selector */}
+        <div className="max-w-md mx-auto mb-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            Select Vehicle Type
+          </label>
+          <div className="flex space-x-2">
+            <select
+              value={selectedVehicle}
+              onChange={(e) => setSelectedVehicle(e.target.value)}
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+            >
+              <option value="">Choose a vehicle type...</option>
+              {vehicles.map(vehicle => (
+                <option key={vehicle.id} value={vehicle.name}>
+                  {vehicle.display_name}
+                </option>
+              ))}
+            </select>
+            {selectedVehicle && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  const vehicle = vehicles.find(v => v.name === selectedVehicle);
+                  if (vehicle) openDeleteVehicleModal(vehicle);
+                }}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg flex items-center transition-colors"
+                title="Delete vehicle type"
+              >
+                <Trash2 className="w-5 h-5" />
+              </motion.button>
+            )}
+          </div>
         </div>
+
+        {/* Action Buttons */}
+        {selectedVehicle && (
+          <div className="flex justify-center space-x-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowAddVehicleForm(true)}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Add New Service</span>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowAddForm(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Add Fare Rule</span>
+            </motion.button>
+          </div>
+        )}
       </motion.div>
 
       {/* Messages */}
@@ -479,158 +579,230 @@ const FareConfigPanel = () => {
         )}
       </AnimatePresence>
 
-      {/* Configurations Grid */}
-      <div className="grid gap-6">
-        {vehicles.map(vehicle => {
-          const vehicleConfigs = configs.filter(config => config.vehicle_type === vehicle.name);
-          
-          return (
+      {/* Delete Vehicle Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteVehicleModal && vehicleToDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
             <motion.div
-              key={vehicle.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4"
             >
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
-                <div className="flex items-center space-x-3">
-                  <div className="text-white">
-                    {getVehicleIcon(vehicle.icon)}
-                  </div>
-                  <h2 className="text-xl font-semibold text-white">
-                    {vehicle.display_name} Fare Structure
-                  </h2>
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="bg-red-100 p-2 rounded-full">
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Delete Vehicle Type
+                </h3>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Are you sure you want to delete the vehicle type <strong>"{vehicleToDelete.display_name}"</strong>?
+                </p>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <p className="text-sm text-yellow-800">
+                    <strong>Warning:</strong> This action cannot be undone. If there are active fare configurations for this vehicle type, the deletion will be prevented.
+                  </p>
                 </div>
               </div>
 
-              <div className="p-6">
-                <div className="grid gap-4">
-                  {vehicleConfigs.map((config, index) => (
-                    <motion.div
-                      key={config.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      {editingId === config.id ? (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              Min Distance
-                            </label>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={editForm.min_distance}
-                              onChange={(e) => setEditForm({ ...editForm, min_distance: parseFloat(e.target.value) })}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              Max Distance
-                            </label>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={editForm.max_distance}
-                              onChange={(e) => setEditForm({ ...editForm, max_distance: parseFloat(e.target.value) })}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              Base Price
-                            </label>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={editForm.base_price}
-                              onChange={(e) => setEditForm({ ...editForm, base_price: parseFloat(e.target.value) })}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              Price per km
-                            </label>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={editForm.price_per_km}
-                              onChange={(e) => setEditForm({ ...editForm, price_per_km: parseFloat(e.target.value) })}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                            />
-                          </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleDeleteVehicle}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteVehicleModal(false);
+                    setVehicleToDelete(null);
+                  }}
+                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fare Structure Display */}
+      {selectedVehicle && selectedVehicleData && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
+        >
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="text-white">
+                  {getVehicleIcon(selectedVehicleData.icon)}
+                </div>
+                <h2 className="text-xl font-semibold text-white">
+                  {selectedVehicleData.display_name} Fare Structure
+                </h2>
+              </div>
+              <div className="text-white text-sm">
+                {filteredConfigs.length} fare rules
+              </div>
+            </div>
+          </div>
+
+          {/* Fare Rules */}
+          <div className="p-6">
+            {filteredConfigs.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <p>No fare rules configured for {selectedVehicleData.display_name}</p>
+                <p className="text-sm mt-2">Click "Add Fare Rule" to create the first rule</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredConfigs.map((config, index) => (
+                  <motion.div
+                    key={config.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  >
+                    {editingId === config.id ? (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Min Distance (km)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editForm.min_distance}
+                            onChange={(e) => setEditForm({ ...editForm, min_distance: parseFloat(e.target.value) })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          />
                         </div>
-                      ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Max Distance (km)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editForm.max_distance}
+                            onChange={(e) => setEditForm({ ...editForm, max_distance: parseFloat(e.target.value) })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Base Price (₱)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editForm.base_price}
+                            onChange={(e) => setEditForm({ ...editForm, base_price: parseFloat(e.target.value) })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Price per km (₱)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editForm.price_per_km}
+                            onChange={(e) => setEditForm({ ...editForm, price_per_km: parseFloat(e.target.value) })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-6">
                           <div className="flex items-center space-x-2">
                             <MapPin className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                            <span className="font-medium text-gray-900 dark:text-white">
                               {config.min_distance} - {config.max_distance} km
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
                             <DollarSign className="w-4 h-4 text-green-500" />
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            <span className="text-gray-600 dark:text-gray-400">
                               Base: {formatPrice(config.base_price)}
                             </span>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              Per km: {formatPrice(config.price_per_km)}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-500">
-                              Total: {formatPrice(config.base_price + (config.max_distance * config.price_per_km))}
-                            </span>
+s                          <div className="text-gray-600 dark:text-gray-400">
+                            Per km: {formatPrice(config.price_per_km)}
                           </div>
                         </div>
-                      )}
-
-                      <div className="flex justify-end space-x-2 mt-4">
-                        {editingId === config.id ? (
-                          <>
-                            <button
-                              onClick={() => handleSave(config.id)}
-                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                            >
-                              <Save className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm transition-colors"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => handleEdit(config)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(config.id)}
-                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleEdit(config)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(config.id)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
+                    )}
+
+                    {editingId === config.id && (
+                      <div className="flex justify-end space-x-2 mt-4">
+                        <button
+                          onClick={() => handleSave(config.id)}
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm transition-colors flex items-center space-x-1"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>Save</span>
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm transition-colors flex items-center space-x-1"
+                        >
+                          <X className="w-4 h-4" />
+                          <span>Cancel</span>
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
               </div>
-            </motion.div>
-          );
-        })}
-      </div>
+            )}
+          </div>
+        </motion.div>
+      )}
+
+      {/* No Vehicle Selected Message */}
+      {!selectedVehicle && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center py-12 text-gray-500"
+        >
+          <Settings className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+          <h3 className="text-lg font-medium mb-2">Select a Vehicle Type</h3>
+          <p>Choose a vehicle type from the dropdown above to view and manage its fare structure.</p>
+        </motion.div>
+      )}
     </div>
   );
 };

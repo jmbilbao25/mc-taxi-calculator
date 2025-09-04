@@ -19,7 +19,6 @@ import { cn } from './lib/utils';
 export default function TaxiFareCalculator() {
   const [darkMode, setDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [showComingSoonModal, setShowComingSoonModal] = useState(false);
   const [showMonitoringModal, setShowMonitoringModal] = useState(false);
   const [logoClickCount, setLogoClickCount] = useState(0);
   const [lastClickTime, setLastClickTime] = useState(0);
@@ -40,10 +39,6 @@ export default function TaxiFareCalculator() {
   } = useFareCalculator();
 
   const handleCalculateFare = () => {
-    if (vehicleType === 'car') {
-      setShowComingSoonModal(true);
-      return;
-    }
     originalCalculateFare();
   };
 
@@ -293,33 +288,6 @@ export default function TaxiFareCalculator() {
         </motion.div>
       </div>
 
-      {/* Coming Soon Modal */}
-      <Modal
-        isOpen={showComingSoonModal}
-        onClose={() => setShowComingSoonModal(false)}
-        title="🚗 Car Calculations"
-      >
-        <div className="text-center space-y-4">
-          <div className="text-6xl mb-4">🚧</div>
-          <h3 className="text-xl font-bold font-display text-foreground mb-2">
-            Coming Soon!
-          </h3>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Car fare calculations are currently under development. We're working hard to bring you this feature soon!
-          </p>
-          <p className="text-sm text-primary font-medium">
-            For now, please use <strong>Motorcycle</strong> for your fare calculations.
-          </p>
-          <div className="pt-4">
-            <button
-              onClick={() => setShowComingSoonModal(false)}
-              className="w-full py-3 px-6 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-colors"
-            >
-              Got it!
-            </button>
-          </div>
-        </div>
-      </Modal>
 
       {/* Hidden Monitoring Modal */}
       <MonitoringModal

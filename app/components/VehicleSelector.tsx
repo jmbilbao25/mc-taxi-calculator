@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
-import { Car, Bike, Truck, Zap } from 'lucide-react';
+import { Car, Bike, Truck, Zap, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface VehicleType {
   id: number;
@@ -39,11 +39,27 @@ export default function VehicleSelector({ selectedVehicle, onVehicleChange }: Ve
   const [vehicles, setVehicles] = useState<VehicleType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://35.74.250.160:3001';
 
   useEffect(() => {
     fetchVehicles();
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const fetchVehicles = async () => {
@@ -66,11 +82,14 @@ export default function VehicleSelector({ selectedVehicle, onVehicleChange }: Ve
     }
   };
 
-  const handleVehicleClick = (vehicleId: string) => {
+  const handleVehicleSelect = (vehicleId: string) => {
     if (vehicleId && vehicleId.length > 0) {
       onVehicleChange(vehicleId);
+      setIsOpen(false);
     }
   };
+
+  const selectedVehicleData = vehicles.find(v => v.name === selectedVehicle);
 
   if (loading) {
     return (
@@ -106,78 +125,109 @@ export default function VehicleSelector({ selectedVehicle, onVehicleChange }: Ve
         <span>Choose Vehicle</span>
         <div className="h-1 w-8 bg-gradient-to-r from-primary to-blue-600 rounded-full" />
       </label>
-      <div className="grid grid-cols-2 gap-4">
-        {vehicles.map((vehicle, index) => {
-          const Icon = getVehicleIcon(vehicle.icon);
-          const emoji = getVehicleEmoji(vehicle.icon);
-          const isSelected = selectedVehicle === vehicle.name;
-          
-          return (
-            <motion.button
-              key={vehicle.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleVehicleClick(vehicle.name)}
-              className={cn(
-                "relative p-6 rounded-2xl border-2 text-center transition-all duration-300 group overflow-hidden",
-                isSelected 
-                  ? 'border-primary bg-primary/10 text-primary shadow-lg shadow-primary/20' 
-                  : 'border-border hover:border-primary/50 hover:bg-accent/50'
-              )}
-            >
-              {/* Background gradient effect */}
-              <div className={cn(
-                "absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300",
-                isSelected 
-                  ? "from-primary/10 to-blue-600/10 opacity-100"
-                  : "from-primary/5 to-blue-600/5 group-hover:opacity-100"
-              )} />
-              
-              {/* Selection indicator */}
-              {isSelected && (
-                <motion.div
-                  layoutId="selection"
-                  className="absolute inset-0 bg-gradient-to-br from-primary/20 to-blue-600/20 rounded-2xl"
-                  transition={{ type: "spring", stiffness: 300 }}
-                />
-              )}
-              
-              <div className="relative z-10">
-                <div className="flex items-center justify-center mb-3">
-                  <div className={cn(
-                    "p-3 rounded-2xl transition-all duration-300",
-                    isSelected 
-                      ? "bg-primary/20 text-primary"
-                      : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-                  )}>
-                    <Icon className="h-6 w-6" />
+      
+      <div className="relative" ref={dropdownRef}>
+        {/* Dropdown Button */}
+        <motion.button
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "w-full p-4 rounded-2xl border-2 text-left transition-all duration-300 flex items-center justify-between",
+            isOpen 
+              ? 'border-primary bg-primary/10 text-primary shadow-lg shadow-primary/20' 
+              : 'border-border hover:border-primary/50 hover:bg-accent/50'
+          )}
+        >
+          <div className="flex items-center gap-3">
+            {selectedVehicleData ? (
+              <>
+                <div className="text-2xl">
+                  {getVehicleEmoji(selectedVehicleData.icon)}
+                </div>
+                <div>
+                  <div className="font-bold text-lg font-display">
+                    {selectedVehicleData.display_name}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {selectedVehicleData.name}
                   </div>
                 </div>
-                
-                <div className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">
-                  {emoji}
-                </div>
-                
-                <div className={cn(
-                  "font-bold text-lg mb-1 font-display",
-                  isSelected ? "text-primary" : "text-foreground"
-                )}>
-                  {vehicle.display_name}
-                </div>
-                
-                <div className={cn(
-                  "text-xs font-medium",
-                  isSelected ? "text-primary/80" : "text-muted-foreground"
-                )}>
-                  {vehicle.name}
-                </div>
+              </>
+            ) : (
+              <div className="text-muted-foreground">
+                Select a vehicle type...
               </div>
-            </motion.button>
-          );
-        })}
+            )}
+          </div>
+          <motion.div
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChevronDown className="h-5 w-5" />
+          </motion.div>
+        </motion.button>
+
+        {/* Dropdown Options */}
+        <motion.div
+          initial={false}
+          animate={{
+            height: isOpen ? 'auto' : 0,
+            opacity: isOpen ? 1 : 0
+          }}
+          transition={{ duration: 0.2 }}
+          className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-2xl shadow-lg overflow-hidden z-50"
+        >
+          <div className="max-h-60 overflow-y-auto">
+            {vehicles.map((vehicle, index) => {
+              const Icon = getVehicleIcon(vehicle.icon);
+              const emoji = getVehicleEmoji(vehicle.icon);
+              const isSelected = selectedVehicle === vehicle.name;
+              
+              return (
+                <motion.button
+                  key={vehicle.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ backgroundColor: 'rgba(var(--primary), 0.1)' }}
+                  onClick={() => handleVehicleSelect(vehicle.name)}
+                  className={cn(
+                    "w-full p-4 text-left transition-all duration-200 flex items-center gap-3 border-b border-border last:border-b-0",
+                    isSelected 
+                      ? 'bg-primary/10 text-primary' 
+                      : 'hover:bg-accent/50'
+                  )}
+                >
+                  <div className="text-2xl">
+                    {emoji}
+                  </div>
+                  <div className="flex-1">
+                    <div className={cn(
+                      "font-bold text-lg font-display",
+                      isSelected ? "text-primary" : "text-foreground"
+                    )}>
+                      {vehicle.display_name}
+                    </div>
+                    <div className={cn(
+                      "text-sm",
+                      isSelected ? "text-primary/80" : "text-muted-foreground"
+                    )}>
+                      {vehicle.name}
+                    </div>
+                  </div>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="w-2 h-2 bg-primary rounded-full"
+                    />
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.div>
       </div>
     </div>
   );
