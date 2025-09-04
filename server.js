@@ -26,8 +26,8 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://localhost:3001',
-    'http://13.211.151.184:3000',
-    'http://13.211.151.184:3001',
+    'http://35.74.250.160:3000',
+    'http://35.74.250.160:3001',
     'https://*.vercel.app',
     'https://mc-taxi-calculator.vercel.app',
     'https://mc-taxi-calculator-qxk71llvy-jmbilbao25s-projects.vercel.app',

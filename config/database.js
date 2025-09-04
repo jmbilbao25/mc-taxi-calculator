@@ -1,16 +1,30 @@
-const mongoose = require('mongoose');
+const { Pool } = require('pg');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fare-calculator', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    const pool = new Pool({
+      user: process.env.DB_USER || 'postgres',
+      host: process.env.DB_HOST || 'database-1.cboacuqkk7st.ap-northeast-1.rds.amazonaws.com',
+      database: process.env.DB_NAME || 'mc_taxi_calculator',
+      password: process.env.DB_PASSWORD || 'D78SIf4QLaAATWWTMABu',
+      port: process.env.DB_PORT || 5432,
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     });
 
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    // Test the connection
+    const client = await pool.connect();
+    await client.query('SELECT NOW()');
+    client.release();
+
+    console.log(`✅ PostgreSQL Connected: ${process.env.DB_HOST || 'database-1.cboacuqkk7st.ap-northeast-1.rds.amazonaws.com'}`);
+    
+    // Store the pool globally for use in models
+    global.dbPool = pool;
+    
   } catch (error) {
     console.error('❌ Database connection error:', error.message);
-    process.exit(1);
+    // Don't exit the process, just log the error
+    console.log('⚠️  Continuing without database connection...');
   }
 };
 
