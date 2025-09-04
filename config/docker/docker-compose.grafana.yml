@@ -8,7 +8,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /home/ec2-user/mc-taxi-calculator/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -33,8 +33,8 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
-      - ../monitoring/grafana/provisioning:/etc/grafana/provisioning
-      - ../monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - /home/ec2-user/mc-taxi-calculator/monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - /home/ec2-user/mc-taxi-calculator/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped
     networks:
       - monitoring
