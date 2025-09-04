@@ -12,23 +12,23 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # MC Taxi API metrics
+  # MC Taxi API metrics - use internal Docker hostname
   - job_name: 'mc-taxi-api'
     static_configs:
-      - targets: ['35.74.250.160:3001']
+      - targets: ['fare-calculator-backend:3001']
     metrics_path: '/metrics'
     scrape_interval: 30s
     scrape_timeout: 10s
 
-  # Node Exporter - System metrics
+  # Node Exporter - use internal Docker hostname
   - job_name: 'node-exporter'
     static_configs:
       - targets: ['node-exporter:9100']
       
-  # AWS EC2 Instance
+  # AWS EC2 Instance - use internal Docker hostname for system metrics
   - job_name: 'ec2-instance'
     static_configs:
-      - targets: ['35.74.250.160:9100']  # Updated EC2 Public IP
+      - targets: ['node-exporter:9100']  # Use internal Docker hostname
     scrape_interval: 30s
 
   # cAdvisor - Container metrics
@@ -36,7 +36,7 @@ scrape_configs:
     static_configs:
       - targets: ['cadvisor:8080']
 
-  # Grafana
+  # Grafana - use internal Docker hostname
   - job_name: 'grafana'
     static_configs:
       - targets: ['grafana:3000']
