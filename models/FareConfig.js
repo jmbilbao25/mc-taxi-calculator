@@ -51,35 +51,82 @@ class FareConfig {
     }
   }
 
-  // Calculate fare based on distance and vehicle type
+  // Calculate fare based on Philippine taxi fare structure
   async calculateFare(vehicleType, distance) {
     try {
-      const query = `
-        SELECT * FROM fare_config 
-        WHERE vehicle_type = $1 
-        AND $2 >= min_distance 
-        AND $2 <= max_distance 
-        AND is_active = true
-        LIMIT 1
-      `;
-      const result = await this.pool.query(query, [vehicleType, distance]);
+      // Philippine Taxi Fare Structure
+      let totalFare = 0;
+      let breakdown = '';
+      let detailedBreakdown = [];
       
-      if (result.rows.length === 0) {
-        throw new Error(`No fare configuration found for ${vehicleType} at distance ${distance}km`);
+      if (distance >= 1 && distance <= 2) {
+        // 1km to 2km: 50 pesos (base fare)
+        totalFare = 50;
+        breakdown = `Base fare (1-2km): ₱50.00`;
+        detailedBreakdown.push({
+          description: 'Base fare (1-2km)',
+          amount: 50
+        });
+      } else if (distance >= 3 && distance <= 8) {
+        // 3km to 8km: 50 pesos base + (distance - 2) × 10 pesos
+        const additionalKm = distance - 2;
+        const additionalFare = additionalKm * 10;
+        totalFare = 50 + additionalFare;
+        breakdown = `Base fare: ₱50.00 + Additional ${additionalKm.toFixed(2)}km × ₱10.00 = ₱${additionalFare.toFixed(2)}`;
+        
+        detailedBreakdown.push({
+          description: 'Base fare (1-2km)',
+          amount: 50
+        });
+        detailedBreakdown.push({
+          description: `Additional distance (${additionalKm.toFixed(2)}km × ₱10.00)`,
+          amount: parseFloat(additionalFare.toFixed(2))
+        });
+      } else if (distance >= 9) {
+        // 9km and above: 50 pesos base + (6 × 10 pesos) + (distance - 8) × 12 pesos
+        const tier1Km = 6; // 3-8km range (6km total)
+        const tier1Fare = tier1Km * 10;
+        const tier2Km = distance - 8;
+        const tier2Fare = tier2Km * 12;
+        totalFare = 50 + tier1Fare + tier2Fare;
+        breakdown = `Base fare: ₱50.00 + 3-8km (${tier1Km}km) × ₱10.00 = ₱${tier1Fare.toFixed(2)} + 9km+ (${tier2Km.toFixed(2)}km) × ₱12.00 = ₱${tier2Fare.toFixed(2)}`;
+        
+        detailedBreakdown.push({
+          description: 'Base fare (1-2km)',
+          amount: 50
+        });
+        detailedBreakdown.push({
+          description: `Mid-range (3-8km: ${tier1Km}km × ₱10.00)`,
+          amount: parseFloat(tier1Fare.toFixed(2))
+        });
+        detailedBreakdown.push({
+          description: `Long distance (9km+: ${tier2Km.toFixed(2)}km × ₱12.00)`,
+          amount: parseFloat(tier2Fare.toFixed(2))
+        });
+      } else {
+        // Less than 1km - minimum fare
+        totalFare = 50;
+        breakdown = `Minimum fare (under 1km): ₱50.00`;
+        detailedBreakdown.push({
+          description: 'Minimum fare (under 1km)',
+          amount: 50
+        });
       }
       
-      const config = result.rows[0];
-      const fare = config.base_price + (distance * config.price_per_km);
-      
       return {
-        fare: Math.round(fare * 100) / 100, // Round to 2 decimal places
+        fare: parseFloat(totalFare.toFixed(2)),
         breakdown: {
-          basePrice: config.base_price,
-          pricePerKm: config.price_per_km,
+          basePrice: 50,
+          pricePerKm: distance > 8 ? 12 : (distance > 2 ? 10 : 0),
           distance: distance,
-          calculation: `${config.base_price} + (${distance} × ${config.price_per_km})`
+          calculation: breakdown
         },
-        config: config
+        detailedBreakdown: detailedBreakdown,
+        config: {
+          vehicle_type: vehicleType,
+          distance: distance,
+          fare_structure: 'Philippine Taxi Standard'
+        }
       };
     } catch (error) {
       console.error('Error calculating fare:', error);
