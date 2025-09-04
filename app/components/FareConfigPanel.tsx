@@ -330,17 +330,17 @@ const FareConfigPanel = () => {
         </div>
 
         {/* Action Buttons */}
-        {selectedVehicle && (
-          <div className="flex justify-center space-x-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowAddVehicleForm(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add New Service</span>
-            </motion.button>
+        <div className="flex justify-center space-x-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAddVehicleForm(true)}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add Vehicle Type</span>
+          </motion.button>
+          {selectedVehicle && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -350,8 +350,8 @@ const FareConfigPanel = () => {
               <Plus className="w-5 h-5" />
               <span>Add Fare Rule</span>
             </motion.button>
-          </div>
-        )}
+          )}
+        </div>
       </motion.div>
 
       {/* Messages */}
@@ -799,8 +799,25 @@ s                          <div className="text-gray-600 dark:text-gray-400">
           className="text-center py-12 text-gray-500"
         >
           <Settings className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <h3 className="text-lg font-medium mb-2">Select a Vehicle Type</h3>
-          <p>Choose a vehicle type from the dropdown above to view and manage its fare structure.</p>
+          <h3 className="text-lg font-medium mb-2">
+            {vehicles.length === 0 ? 'No Vehicle Types Available' : 'Select a Vehicle Type'}
+          </h3>
+          <p className="mb-4">
+            {vehicles.length === 0 
+              ? 'Get started by adding your first vehicle type using the "Add Vehicle Type" button above.'
+              : 'Choose a vehicle type from the dropdown above to view and manage its fare structure.'
+            }
+          </p>
+          {vehicles.length === 0 && (
+            <div className="text-sm text-gray-400">
+              <p>After adding a vehicle type, you can:</p>
+              <ul className="mt-2 space-y-1">
+                <li>• Configure fare rules for different distance ranges</li>
+                <li>• Set base prices and per-kilometer rates</li>
+                <li>• Manage multiple vehicle types</li>
+              </ul>
+            </div>
+          )}
         </motion.div>
       )}
     </div>
