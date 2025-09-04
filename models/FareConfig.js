@@ -223,6 +223,28 @@ class FareConfig {
     }
   }
 
+  // Create new vehicle type
+  async createVehicleType(vehicleData) {
+    try {
+      const query = `
+        INSERT INTO vehicle_types (name, display_name, icon)
+        VALUES ($1, $2, $3)
+        RETURNING *
+      `;
+      const values = [
+        vehicleData.name,
+        vehicleData.display_name,
+        vehicleData.icon
+      ];
+      
+      const result = await this.pool.query(query, values);
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error creating vehicle type:', error);
+      throw error;
+    }
+  }
+
   // Close database connection
   async close() {
     await this.pool.end();

@@ -30,6 +30,7 @@ const FareConfigPanel = () => {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddVehicleForm, setShowAddVehicleForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -47,6 +48,12 @@ const FareConfigPanel = () => {
     max_distance: 0,
     base_price: 0,
     price_per_km: 0
+  });
+
+  const [addVehicleForm, setAddVehicleForm] = useState({
+    name: '',
+    display_name: '',
+    icon: 'car'
   });
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -164,6 +171,33 @@ const FareConfigPanel = () => {
     }
   };
 
+  const handleAddVehicle = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/api/fare-config/vehicles`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(addVehicleForm)
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setSuccess('New vehicle type created successfully!');
+        setShowAddVehicleForm(false);
+        setAddVehicleForm({
+          name: '',
+          display_name: '',
+          icon: 'car'
+        });
+        fetchVehicles();
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        setError(data.error || 'Failed to create vehicle type');
+      }
+    } catch (error) {
+      setError('Failed to create vehicle type');
+    }
+  };
+
   const getVehicleIcon = (icon: string) => {
     switch (icon) {
       case 'car': return <Car className="w-5 h-5" />;
@@ -198,15 +232,26 @@ const FareConfigPanel = () => {
             Fare Configuration Panel
           </h1>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowAddForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Add New Configuration</span>
-        </motion.button>
+        <div className="flex space-x-3">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAddVehicleForm(true)}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add New Service</span>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAddForm(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add New Configuration</span>
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* Messages */}
@@ -342,6 +387,88 @@ const FareConfigPanel = () => {
                 </button>
                 <button
                   onClick={() => setShowAddForm(false)}
+                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Add Vehicle Type Modal */}
+      <AnimatePresence>
+        {showAddVehicleForm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4"
+            >
+              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                Add New Service Type
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Service Name (internal)
+                  </label>
+                  <input
+                    type="text"
+                    value={addVehicleForm.name}
+                    onChange={(e) => setAddVehicleForm({ ...addVehicleForm, name: e.target.value })}
+                    placeholder="e.g., taxi, bus, jeepney"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Display Name
+                  </label>
+                  <input
+                    type="text"
+                    value={addVehicleForm.display_name}
+                    onChange={(e) => setAddVehicleForm({ ...addVehicleForm, display_name: e.target.value })}
+                    placeholder="e.g., Taxi, Bus, Jeepney"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Icon
+                  </label>
+                  <select
+                    value={addVehicleForm.icon}
+                    onChange={(e) => setAddVehicleForm({ ...addVehicleForm, icon: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="car">Car</option>
+                    <option value="bike">Bike</option>
+                    <option value="truck">Truck</option>
+                    <option value="zap">Zap (Motorcycle)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  onClick={handleAddVehicle}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Add Service
+                </button>
+                <button
+                  onClick={() => setShowAddVehicleForm(false)}
                   className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg transition-colors"
                 >
                   Cancel

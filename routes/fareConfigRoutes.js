@@ -194,4 +194,39 @@ router.get('/vehicles', async (req, res) => {
   }
 });
 
+// Create new vehicle type
+router.post('/vehicles', async (req, res) => {
+  try {
+    const { name, display_name, icon } = req.body;
+    
+    if (!name || !display_name) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name and display_name are required'
+      });
+    }
+    
+    const fareConfig = new FareConfig();
+    const vehicle = await fareConfig.createVehicleType({
+      name,
+      display_name,
+      icon: icon || 'car'
+    });
+    await fareConfig.close();
+    
+    res.status(201).json({
+      success: true,
+      data: vehicle,
+      message: 'Vehicle type created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating vehicle type:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create vehicle type',
+      details: error.message
+    });
+  }
+});
+
 module.exports = router;

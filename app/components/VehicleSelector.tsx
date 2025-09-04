@@ -1,37 +1,104 @@
 import { motion } from 'framer-motion';
-import { Car, Bike } from 'lucide-react';
+import { Car, Bike, Truck, Zap } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useState, useEffect } from 'react';
+
+interface VehicleType {
+  id: number;
+  name: string;
+  display_name: string;
+  icon: string;
+}
 
 interface VehicleSelectorProps {
   selectedVehicle: string;
   onVehicleChange: (vehicle: string) => void;
 }
 
-const vehicles = [
-  { 
-    id: 'motorcycle', 
-    name: 'Motorcycle', 
-    emoji: '🏍️',
-    icon: Bike,
-    description: 'Fast & Economic'
-  },
-  { 
-    id: 'car', 
-    name: 'Car', 
-    emoji: '🚗',
-    icon: Car,
-    description: 'Comfortable & Safe'
+const getVehicleIcon = (iconName: string) => {
+  switch (iconName) {
+    case 'car': return Car;
+    case 'bike': return Bike;
+    case 'truck': return Truck;
+    case 'zap': return Zap;
+    default: return Car;
   }
-];
+};
+
+const getVehicleEmoji = (iconName: string) => {
+  switch (iconName) {
+    case 'car': return '🚗';
+    case 'bike': return '🏍️';
+    case 'truck': return '🚛';
+    case 'zap': return '⚡';
+    default: return '🚗';
+  }
+};
 
 export default function VehicleSelector({ selectedVehicle, onVehicleChange }: VehicleSelectorProps) {
-  // TODO: Maybe add loading state for vehicle options in the future
+  const [vehicles, setVehicles] = useState<VehicleType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
+  const fetchVehicles = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/api/fare-config/vehicles`);
+      const data = await response.json();
+      if (data.success) {
+        setVehicles(data.data);
+        // Set default vehicle if none selected
+        if (!selectedVehicle && data.data.length > 0) {
+          onVehicleChange(data.data[0].name);
+        }
+      } else {
+        setError('Failed to load vehicle types');
+      }
+    } catch (error) {
+      setError('Failed to load vehicle types');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleVehicleClick = (vehicleId: string) => {
-    // Simple validation - could be more robust
     if (vehicleId && vehicleId.length > 0) {
       onVehicleChange(vehicleId);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <label className="text-sm font-semibold text-foreground mb-3 block flex items-center gap-2 font-display">
+          <span>Choose Vehicle</span>
+          <div className="h-1 w-8 bg-gradient-to-r from-primary to-blue-600 rounded-full" />
+        </label>
+        <div className="flex justify-center items-center p-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <label className="text-sm font-semibold text-foreground mb-3 block flex items-center gap-2 font-display">
+          <span>Choose Vehicle</span>
+          <div className="h-1 w-8 bg-gradient-to-r from-primary to-blue-600 rounded-full" />
+        </label>
+        <div className="text-center p-4 text-red-500">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -41,8 +108,9 @@ export default function VehicleSelector({ selectedVehicle, onVehicleChange }: Ve
       </label>
       <div className="grid grid-cols-2 gap-4">
         {vehicles.map((vehicle, index) => {
-          const Icon = vehicle.icon;
-          const isSelected = selectedVehicle === vehicle.id;
+          const Icon = getVehicleIcon(vehicle.icon);
+          const emoji = getVehicleEmoji(vehicle.icon);
+          const isSelected = selectedVehicle === vehicle.name;
           
           return (
             <motion.button
@@ -52,7 +120,7 @@ export default function VehicleSelector({ selectedVehicle, onVehicleChange }: Ve
               transition={{ delay: index * 0.1 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => handleVehicleClick(vehicle.id)}
+              onClick={() => handleVehicleClick(vehicle.name)}
               className={cn(
                 "relative p-6 rounded-2xl border-2 text-center transition-all duration-300 group overflow-hidden",
                 isSelected 
@@ -90,21 +158,21 @@ export default function VehicleSelector({ selectedVehicle, onVehicleChange }: Ve
                 </div>
                 
                 <div className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">
-                  {vehicle.emoji}
+                  {emoji}
                 </div>
                 
                 <div className={cn(
                   "font-bold text-lg mb-1 font-display",
                   isSelected ? "text-primary" : "text-foreground"
                 )}>
-                  {vehicle.name}
+                  {vehicle.display_name}
                 </div>
                 
                 <div className={cn(
                   "text-xs font-medium",
                   isSelected ? "text-primary/80" : "text-muted-foreground"
                 )}>
-                  {vehicle.description}
+                  {vehicle.name}
                 </div>
               </div>
             </motion.button>
