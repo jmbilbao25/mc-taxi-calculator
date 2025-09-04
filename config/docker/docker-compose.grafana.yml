@@ -17,7 +17,7 @@ services:
       - '--web.enable-lifecycle'
     restart: unless-stopped
     networks:
-      - fare-calculator-network
+      - mc-taxi-calculator_fare-calculator-network
 
   # Grafana - Visualization
   grafana:
@@ -35,7 +35,7 @@ services:
       - /home/ec2-user/mc-taxi-calculator/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped
     networks:
-      - fare-calculator-network
+      - mc-taxi-calculator_fare-calculator-network
     depends_on:
       - prometheus
 
@@ -55,7 +55,7 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     restart: unless-stopped
     networks:
-      - fare-calculator-network
+      - mc-taxi-calculator_fare-calculator-network
 
   # cAdvisor - Container metrics
   cadvisor:
@@ -71,12 +71,12 @@ services:
       - /dev/disk/:/dev/disk:ro
     restart: unless-stopped
     networks:
-      - fare-calculator-network
+      - mc-taxi-calculator_fare-calculator-network
 
 volumes:
   prometheus_data:
   grafana_data:
 
 networks:
-  fare-calculator-network:
+  mc-taxi-calculator_fare-calculator-network:
     external: true
