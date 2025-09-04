@@ -104,6 +104,30 @@ Complete Postman collection with all endpoints and automated tests:
 
 ## 🏗️ Architecture
 
+<div align="center">
+  <img src="public/diagram.png" alt="System Architecture Diagram" width="800" style="margin: 20px 0;">
+</div>
+
+### System Components & Connections
+
+**Frontend Layer:**
+- **Vercel** (Frontend) → **Docker** (Backend API) via API calls
+- Next.js application serving the user interface
+
+**Backend Layer:**
+- **Docker** (Backend API) → **AWS RDS** (Database) via database queries
+- Node.js/Express.js API handling business logic
+
+**Infrastructure Layer:**
+- **AWS EC2** hosts the Docker containers
+- **AWS RDS** provides managed PostgreSQL database
+
+**Monitoring Layer:**
+- **Prometheus** scrapes metrics from all services
+- **Grafana** queries Prometheus for data visualization
+- Real-time monitoring of application performance and system health
+
+### Data Flow
 ```
 Frontend (Next.js) → API (Express.js) → Database (PostgreSQL)
                              ↓
