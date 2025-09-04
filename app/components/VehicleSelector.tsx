@@ -40,7 +40,7 @@ export default function VehicleSelector({ selectedVehicle, onVehicleChange }: Ve
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://35.74.250.160:3001';
 
   useEffect(() => {
     fetchVehicles();

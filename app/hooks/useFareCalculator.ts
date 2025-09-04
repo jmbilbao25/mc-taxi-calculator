@@ -21,7 +21,7 @@ export function useFareCalculator() {
   const [calculationAttempts, setCalculationAttempts] = useState(0);
 
   // Backend API URL configuration
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://35.74.250.160:3001';
   
   const getApiUrl = (endpoint: string) => {
     const baseUrl = API_URL.startsWith('http') ? API_URL : `http://${API_URL}`;

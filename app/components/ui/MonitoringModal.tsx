@@ -11,7 +11,7 @@ interface MonitoringModalProps {
 
 const getMonitoringLinks = () => {
   const baseUrl = process.env.NODE_ENV === 'production' 
-    ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    ? process.env.NEXT_PUBLIC_API_URL || 'http://35.74.250.160:3001'
     : 'http://localhost';
     
   return [
