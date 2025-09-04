@@ -20,11 +20,16 @@ export function useFareCalculator() {
   // Keep track of calculation attempts - useful for analytics later
   const [calculationAttempts, setCalculationAttempts] = useState(0);
 
-  // Backend API URL configuration
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://35.74.250.160:3001';
-  
+  // Backend API URL configuration with fallbacks
   const getApiUrl = (endpoint: string) => {
-    const baseUrl = API_URL.startsWith('http') ? API_URL : `http://${API_URL}`;
+    const fallbackUrls = [
+      process.env.NEXT_PUBLIC_API_URL || 'http://35.74.250.160:3001',
+      'http://35.74.250.160:3001',
+      'http://13.211.151.184:3001',
+      'http://localhost:3001'
+    ];
+    
+    const baseUrl = fallbackUrls[0].startsWith('http') ? fallbackUrls[0] : `http://${fallbackUrls[0]}`;
     return `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   };
 

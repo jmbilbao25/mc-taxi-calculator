@@ -42,7 +42,23 @@ export default function VehicleSelector({ selectedVehicle, onVehicleChange }: Ve
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://35.74.250.160:3001';
+  // Try multiple API endpoints in case of deployment issues
+  const getApiBase = () => {
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      return process.env.NEXT_PUBLIC_API_URL;
+    }
+    
+    // Fallback URLs for different deployment scenarios
+    const fallbackUrls = [
+      'http://35.74.250.160:3001',
+      'http://13.211.151.184:3001',
+      'http://localhost:3001'
+    ];
+    
+    return fallbackUrls[0]; // Use the primary URL
+  };
+  
+  const API_BASE = getApiBase();
 
   useEffect(() => {
     fetchVehicles();
@@ -63,23 +79,42 @@ export default function VehicleSelector({ selectedVehicle, onVehicleChange }: Ve
   }, []);
 
   const fetchVehicles = async () => {
-    try {
-      const response = await fetch(`${API_BASE}/api/fare-config/vehicles`);
-      const data = await response.json();
-      if (data.success) {
-        setVehicles(data.data);
-        // Set default vehicle if none selected
-        if (!selectedVehicle && data.data.length > 0) {
-          onVehicleChange(data.data[0].name);
+    const fallbackUrls = [
+      'http://35.74.250.160:3001',
+      'http://13.211.151.184:3001',
+      'http://localhost:3001'
+    ];
+    
+    // Try the configured API_BASE first, then fallbacks
+    const urlsToTry = [API_BASE, ...fallbackUrls.filter(url => url !== API_BASE)];
+    
+    for (const baseUrl of urlsToTry) {
+      try {
+        console.log(`Trying to fetch vehicles from: ${baseUrl}`);
+        const response = await fetch(`${baseUrl}/api/fare-config/vehicles`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setVehicles(data.data);
+            // Set default vehicle if none selected
+            if (!selectedVehicle && data.data.length > 0) {
+              onVehicleChange(data.data[0].name);
+            }
+            setError(null);
+            setLoading(false);
+            return; // Success, exit the loop
+          }
         }
-      } else {
-        setError('Failed to load vehicle types');
+      } catch (error) {
+        console.error(`Failed to fetch from ${baseUrl}:`, error);
+        continue; // Try next URL
       }
-    } catch (error) {
-      setError('Failed to load vehicle types');
-    } finally {
-      setLoading(false);
     }
+    
+    // If all URLs failed
+    setError('Failed to load vehicle types from all endpoints');
+    setLoading(false);
   };
 
   const handleVehicleSelect = (vehicleId: string) => {
