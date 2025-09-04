@@ -63,7 +63,8 @@ export function useFareCalculator() {
     }
 
     try {
-      const apiUrl = getApiUrl('/api/calculate-fare');
+      // Use the new database-driven fare calculation endpoint
+      const apiUrl = getApiUrl('/api/fare-config/calculate');
       // Debug logs - should be removed in production
       if (process.env.NODE_ENV === 'development') {
         console.log('Making request to:', apiUrl);
@@ -84,7 +85,7 @@ export function useFareCalculator() {
       if (process.env.NODE_ENV === 'development') {
         console.log('Response status:', response.status);
       }
-      const data: FareCalculationResult = await response.json();
+      const data = await response.json();
       
       // Log response for debugging
       if (process.env.NODE_ENV === 'development') {
@@ -92,8 +93,8 @@ export function useFareCalculator() {
       }
 
       if (data.success && data.data) {
-        setFare(data.data.totalFare);
-        setBreakdown(data.data.breakdown);
+        setFare(data.data.fare);
+        setBreakdown(data.data.breakdown.calculation);
       } else {
         setError(data.message || 'Failed to calculate fare. Please try again.');
       }

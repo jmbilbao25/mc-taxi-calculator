@@ -7,6 +7,7 @@ require('dotenv').config();
 
 const connectDB = require('./config/database');
 const fareRoutes = require('./routes/fareRoutes');
+const fareConfigRoutes = require('./routes/fareConfigRoutes');
 const healthRoutes = require('./routes/healthRoutes');
 const metricsRoutes = require('./routes/metricsRoutes');
 const errorHandler = require('./middleware/errorHandler');
@@ -47,6 +48,7 @@ app.use(metricsMiddleware);
 
 // Routes
 app.use('/api', fareRoutes);
+app.use('/api/fare-config', fareConfigRoutes);
 app.use('/api', healthRoutes);
 app.use('/api', metricsRoutes);
 
@@ -61,6 +63,9 @@ app.get('/', (req, res) => {
     endpoints: {
       'POST /api/calculate-fare': 'Calculate fare based on distance',
       'GET /api/fare-history': 'Retrieve calculation history',
+      'GET /api/fare-config/configs': 'Get all fare configurations',
+      'PUT /api/fare-config/configs/:id': 'Update fare configuration',
+      'POST /api/fare-config/configs': 'Create new fare configuration',
       'GET /api/health': 'Health check endpoint',
       'GET /api/metrics': 'Custom metrics endpoint'
     }
