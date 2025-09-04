@@ -8,7 +8,13 @@ const connectDB = async () => {
       database: process.env.DB_NAME || 'mc_taxi_calculator',
       password: process.env.DB_PASSWORD || 'D78SIf4QLaAATWWTMABu',
       port: process.env.DB_PORT || 5432,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      ssl: {
+        rejectUnauthorized: false,
+        require: true
+      },
+      // Add connection timeout
+      connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: 30000,
     });
 
     // Test the connection
