@@ -12,7 +12,6 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      # Updated to use PostgreSQL environment variables
       DB_USER: postgres
       DB_HOST: database-1.cboacuqkk7st.ap-northeast-1.rds.amazonaws.com
       DB_NAME: mc_taxi_calculator
