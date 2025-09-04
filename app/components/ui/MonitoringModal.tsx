@@ -178,7 +178,7 @@ export function MonitoringModal({ isOpen, onClose }: MonitoringModalProps) {
                           Service Status
                         </h4>
                         <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                          Services are running on AWS EC2 (13.211.151.184). If Grafana shows loading issues, the service may need restart.
+                          Services are running on AWS EC2 (35.74.250.160). If Grafana shows loading issues, the service may need restart.
                         </p>
                       </div>
                     </div>

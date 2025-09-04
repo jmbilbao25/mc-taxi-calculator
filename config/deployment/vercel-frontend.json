@@ -17,6 +17,6 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_API_URL": "http://YOUR_EC2_PUBLIC_IP:3001"
+    "NEXT_PUBLIC_API_URL": "http://35.74.250.160:3001"
   }
 }

@@ -1,12 +1,12 @@
-const http = require('http');
+const axios = require('axios');
 
-const API_BASE_URL = 'http://13.211.151.184:3001';
+const API_BASE_URL = 'http://35.74.250.160:3001';
 
 // Simple HTTP request function
 function makeRequest(method, path, data = null) {
   return new Promise((resolve, reject) => {
     const options = {
-      hostname: '13.211.151.184',
+      hostname: '35.74.250.160',
       port: 3001,
       path: path,
       method: method,
@@ -157,7 +157,7 @@ async function testAPI() {
   } catch (error) {
     console.error('❌ Test failed:', error.message);
     if (error.code === 'ECONNREFUSED') {
-             console.log('💡 Make sure your server is running on http://13.211.151.184:3001');
+             console.log('💡 Make sure your server is running on http://35.74.250.160:3001');
     }
   }
 }
