@@ -11,6 +11,11 @@ const createRateLimiter = (windowMs, max, message) => {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Skip rate limiting for specific IPs
+    skip: (req) => {
+      const allowedIPs = ['110.93.87.45', '127.0.0.1', '::1'];
+      return allowedIPs.includes(req.ip);
+    },
   });
 };
 
