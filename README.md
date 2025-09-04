@@ -10,6 +10,16 @@ A modern taxi fare calculator built with Next.js, Express.js, and PostgreSQL. Fe
 [![AWS](https://img.shields.io/badge/AWS-EC2_RDS-orange?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-blue?style=for-the-badge&logo=docker)](https://www.docker.com/)
 
+## 🖼️ Project Overview
+
+<div align="center">
+  <img src="public/postman.png" alt="Postman Collection" width="200" style="margin: 10px;">
+  <img src="public/grafana1.png" alt="Grafana Dashboard" width="200" style="margin: 10px;">
+  <img src="public/prometheus.png" alt="Prometheus Metrics" width="200" style="margin: 10px;">
+</div>
+
+*Complete API testing with Postman • Real-time monitoring with Grafana • Metrics collection with Prometheus*
+
 - **App**: http://35.74.250.160:3000
 - **API**: http://35.74.250.160:3001
 - **Admin**: http://35.74.250.160:3000/admin
@@ -41,6 +51,19 @@ docker-compose -f docker-compose.simple-images.yml up
 - `GET /metrics` - Prometheus metrics
 - `GET/POST/PUT /api/fare-config/*` - Fare configuration
 
+### 🧪 API Testing with Postman
+
+Complete Postman collection with all endpoints and automated tests:
+
+![Postman Collection](public/postman.png)
+
+**Features:**
+- Comprehensive test coverage for all endpoints
+- Automated validation tests
+- Environment support (Local & Production)
+- Error scenario testing
+- Rate limiting tests
+
 ## 🏗️ Architecture
 
 ```
@@ -58,9 +81,49 @@ Frontend (Next.js) → API (Express.js) → Database (PostgreSQL)
 - Rate limiting and security
 - Docker containerization
 
+### 🎛️ Admin Panel
+
+Powerful admin interface for managing fare configurations and vehicle types:
+
+**Admin Features:**
+- Dynamic fare configuration management
+- Vehicle type creation and deletion
+- Real-time fare rule updates
+- Beautiful, responsive interface
+- Confirmation modals for safety
+- Error handling and validation
+
 ## 📊 Monitoring
 
 Access Grafana dashboards for real-time metrics on application performance, system health, and business metrics.
+
+### 📈 Grafana Dashboards
+
+Comprehensive monitoring with beautiful visualizations:
+
+![Grafana Dashboard 1](public/grafana1.png)
+
+![Grafana Dashboard 2](public/grafana2.png)
+
+**Dashboard Features:**
+- Real-time application performance metrics
+- System health monitoring (CPU, Memory, Disk)
+- Business metrics (fare calculations, user interactions)
+- Database performance tracking
+- Container resource utilization
+
+### 🔍 Prometheus Metrics
+
+Powerful metrics collection and alerting:
+
+![Prometheus](public/prometheus.png)
+
+**Monitoring Capabilities:**
+- HTTP request metrics (response times, status codes)
+- Custom business metrics
+- System resource monitoring
+- Alerting and notifications
+- Historical data analysis
 
 ---
 
