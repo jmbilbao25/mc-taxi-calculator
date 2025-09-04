@@ -25,8 +25,45 @@ async function setupTables() {
     const schemaPath = path.join(__dirname, 'config', 'database-schema.sql');
     const schema = fs.readFileSync(schemaPath, 'utf8');
     
-    // Split by semicolon and execute each statement
-    const statements = schema.split(';').filter(stmt => stmt.trim());
+    // Split by semicolon but handle dollar-quoted strings properly
+    const statements = [];
+    let currentStatement = '';
+    let inDollarQuote = false;
+    let dollarTag = '';
+    
+    const lines = schema.split('\n');
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      // Check for start of dollar-quoted string
+      if (!inDollarQuote && trimmedLine.includes('$$')) {
+        const dollarMatch = trimmedLine.match(/\$([^$]*)\$/);
+        if (dollarMatch) {
+          inDollarQuote = true;
+          dollarTag = dollarMatch[0];
+        }
+      }
+      
+      currentStatement += line + '\n';
+      
+      // Check for end of dollar-quoted string
+      if (inDollarQuote && trimmedLine.includes(dollarTag)) {
+        inDollarQuote = false;
+        dollarTag = '';
+      }
+      
+      // If we're not in a dollar-quoted string and line ends with semicolon
+      if (!inDollarQuote && trimmedLine.endsWith(';')) {
+        statements.push(currentStatement.trim());
+        currentStatement = '';
+      }
+    }
+    
+    // Add any remaining statement
+    if (currentStatement.trim()) {
+      statements.push(currentStatement.trim());
+    }
     
     for (const statement of statements) {
       if (statement.trim()) {
@@ -38,6 +75,7 @@ async function setupTables() {
             console.log('⚠️  Table/function already exists, skipping...');
           } else {
             console.error('❌ Error executing statement:', error.message);
+            console.error('Statement:', statement.substring(0, 100) + '...');
           }
         }
       }
