@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS vehicle_types (
 
 -- Insert default vehicle types
 INSERT INTO vehicle_types (name, display_name, icon) VALUES
-('motorcycle', 'Motorcycle', 'motorcycle'),
+('motorcycle', 'Motorcycle', 'zap'),
 ('tricycle', 'Tricycle', 'bike'),
 ('car', 'Car', 'car'),
 ('van', 'Van', 'truck')

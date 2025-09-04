@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, Edit, Plus, Trash2, Save, X, DollarSign, MapPin, Car, Bike, Truck, Motorcycle } from 'lucide-react';
+import { Settings, Edit, Plus, Trash2, Save, X, DollarSign, MapPin, Car, Bike, Truck, Zap } from 'lucide-react';
 
 interface FareConfig {
   id: number;
@@ -169,7 +169,7 @@ const FareConfigPanel = () => {
       case 'car': return <Car className="w-5 h-5" />;
       case 'bike': return <Bike className="w-5 h-5" />;
       case 'truck': return <Truck className="w-5 h-5" />;
-      case 'motorcycle': return <Motorcycle className="w-5 h-5" />;
+      case 'zap': return <Zap className="w-5 h-5" />;
       default: return <Car className="w-5 h-5" />;
     }
   };
