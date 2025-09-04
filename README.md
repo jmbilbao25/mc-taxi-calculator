@@ -2,6 +2,44 @@
 
 A modern taxi fare calculator built with Next.js, Express.js, and PostgreSQL. Features real-time calculations, admin panel, and comprehensive monitoring.
 
+## 🎯 **My Learning Journey**
+
+This project represents my journey into **DevOps and Cloud Engineering**. As someone passionate about becoming a DevOps or Cloud Engineer, I created this simple taxi calculator to get hands-on experience with the technologies that are essential in modern cloud infrastructure.
+
+### **Why This Project?**
+
+I wanted to build something practical while learning the core technologies that every DevOps/Cloud Engineer should know:
+
+- **AWS EC2**: Understanding virtual machines, instance management, and cloud computing fundamentals
+- **AWS RDS**: Learning managed database services and how they differ from self-hosted solutions
+- **Backend API Development**: Building RESTful APIs with Express.js to understand how services communicate
+- **Docker & Docker Compose**: Containerization is crucial for DevOps - learning how to package applications and manage multi-container environments
+- **Database Migration**: I started with MongoDB (NoSQL) to understand document-based databases, then migrated to PostgreSQL (SQL) on AWS RDS to experience the differences between NoSQL and relational databases
+
+### **What I Learned**
+
+This project taught me:
+- How to deploy applications on cloud infrastructure
+- The importance of containerization in modern development
+- Database management and migration strategies
+- API design and backend development
+- Monitoring and observability with Prometheus and Grafana
+- The differences between NoSQL and SQL databases in real-world scenarios
+
+### **The Migration Story**
+
+Originally, this project used **MongoDB** - a NoSQL database that I was familiar with. However, I decided to migrate to **PostgreSQL on AWS RDS** to:
+- Experience the differences between NoSQL and SQL databases
+- Learn about managed database services
+- Understand data migration processes
+- Get familiar with relational database concepts
+
+This migration was a valuable learning experience that gave me insights into both database paradigms and helped me understand when to use each approach.
+
+---
+
+*This project is my stepping stone into the world of DevOps and Cloud Engineering. Every line of code, every Docker container, and every AWS service configuration is a step closer to my goal of becoming a skilled cloud professional.*
+
 [![Next.js](https://img.shields.io/badge/Next.js-14.2.13-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
