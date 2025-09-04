@@ -1,5 +1,5 @@
-const FareCalculation = require('../models/FareCalculation');
-const AppMetrics = require('../models/AppMetrics');
+const FareCalculationRDS = require('../models/FareCalculationRDS');
+const AppMetricsRDS = require('../models/AppMetricsRDS');
 const { recordFareCalculation } = require('../middleware/metrics');
 
 const fareController = {
@@ -17,23 +17,17 @@ const fareController = {
       const totalFare = fareResult.fare;
 
       // Create new fare calculation record
-      const calculation = new FareCalculation({
+      const calculation = new FareCalculationRDS({
         distance,
-        baseFare: fareResult.baseFare,
-        perKmRate: fareResult.averageRate,
         totalFare,
         vehicleType,
         clientId,
-        fareBreakdown: fareResult.breakdown,
-        tierDetails: fareResult.tierDetails,
-        metadata: {
-          userAgent: req.get('User-Agent'),
-          ipAddress: req.ip,
-          location: req.body.location
-        }
+        breakdown: fareResult.breakdown,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
       });
 
-              await calculation.save();
+      const savedCalculation = await calculation.save();
 
         // Update metrics
         await updateMetrics(vehicleType, totalFare);
@@ -44,14 +38,14 @@ const fareController = {
       res.status(200).json({
         success: true,
         data: {
-          calculationId: calculation._id,
+          calculationId: savedCalculation.id,
           distance,
           totalFare,
           vehicleType,
           breakdown: fareResult.breakdown,
           fareBreakdown: fareResult.detailedBreakdown,
           tierDetails: fareResult.tierDetails,
-          timestamp: calculation.timestamp
+          timestamp: savedCalculation.createdAt || new Date()
         }
       });
     } catch (error) {
@@ -88,30 +82,15 @@ const fareController = {
         if (endDate) filter.timestamp.$lte = new Date(endDate);
       }
 
-      // Execute query with pagination
-      const calculations = await FareCalculation
-        .find(filter)
-        .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
-        .select('-metadata -__v');
+      // Execute query with pagination using RDS
+      const offset = (page - 1) * limit;
+      const calculations = await FareCalculationRDS.findAll(limit, offset);
 
-      const total = await FareCalculation.countDocuments(filter);
+      // Get total count (simplified for now)
+      const total = calculations.length;
 
-      // Calculate summary statistics
-      const stats = await FareCalculation.aggregate([
-        { $match: filter },
-        {
-          $group: {
-            _id: null,
-            totalCalculations: { $sum: 1 },
-            averageFare: { $avg: '$totalFare' },
-            totalDistance: { $sum: '$distance' },
-            minFare: { $min: '$totalFare' },
-            maxFare: { $max: '$totalFare' }
-          }
-        }
-      ]);
+      // Calculate summary statistics using RDS
+      const stats = await FareCalculationRDS.getStatistics();
 
       res.status(200).json({
         success: true,
@@ -149,16 +128,16 @@ const fareController = {
 // Helper function to update metrics
 async function updateMetrics(vehicleType, totalFare) {
   try {
-    let metrics = await AppMetrics.findOne();
+    let metrics = await AppMetricsRDS.findOne();
     
-          if (!metrics) {
-        metrics = new AppMetrics({
-          popularVehicleTypes: [
-            { type: 'motorcycle', count: 0 },
-            { type: 'car', count: 0 }
-          ]
-        });
-      }
+    if (!metrics) {
+      metrics = new AppMetricsRDS({
+        popularVehicleTypes: [
+          { type: 'motorcycle', count: 0 },
+          { type: 'car', count: 0 }
+        ]
+      });
+    }
 
     metrics.totalCalculations += 1;
     metrics.totalRequests += 1;
@@ -178,7 +157,7 @@ async function updateMetrics(vehicleType, totalFare) {
     today.setHours(0, 0, 0, 0);
     
     const dailyStatIndex = metrics.dailyStats.findIndex(
-      stat => stat.date.getTime() === today.getTime()
+      stat => new Date(stat.date).getTime() === today.getTime()
     );
 
     if (dailyStatIndex !== -1) {

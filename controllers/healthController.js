@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-const FareCalculation = require('../models/FareCalculation');
+const { query } = require('../config/database-rds');
 
 const healthController = {
   healthCheck: async (req, res) => {
@@ -24,11 +23,9 @@ const healthController = {
 
       // Check database connection
       try {
-        await mongoose.connection.db.admin().ping();
-        healthData.services.database = 'connected';
-        
         // Test database query
-        const count = await FareCalculation.countDocuments();
+        const result = await query('SELECT COUNT(*) as count FROM fare_calculations');
+        const count = result.rows[0]?.count || 0;
         healthData.services.database = `connected (${count} records)`;
       } catch (dbError) {
         healthData.services.database = 'disconnected';

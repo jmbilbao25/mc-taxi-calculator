@@ -87,7 +87,36 @@ CREATE TRIGGER update_fare_config_updated_at
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 
+-- Create fare calculations table
+CREATE TABLE IF NOT EXISTS fare_calculations (
+    id SERIAL PRIMARY KEY,
+    distance DECIMAL(8,2) NOT NULL,
+    vehicle_type VARCHAR(50) NOT NULL,
+    total_fare DECIMAL(10,2) NOT NULL,
+    breakdown TEXT,
+    client_id VARCHAR(100) DEFAULT 'anonymous',
+    ip_address INET,
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create app metrics table
+CREATE TABLE IF NOT EXISTS app_metrics (
+    id SERIAL PRIMARY KEY,
+    total_requests INTEGER DEFAULT 0,
+    total_calculations INTEGER DEFAULT 0,
+    average_fare DECIMAL(10,2) DEFAULT 0,
+    popular_vehicle_types JSONB DEFAULT '[]',
+    daily_stats JSONB DEFAULT '[]',
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_fare_config_vehicle_type ON fare_config(vehicle_type);
 CREATE INDEX IF NOT EXISTS idx_fare_config_distance ON fare_config(min_distance, max_distance);
 CREATE INDEX IF NOT EXISTS idx_fare_config_active ON fare_config(is_active);
+
+-- Create indexes for fare calculations
+CREATE INDEX IF NOT EXISTS idx_fare_calculations_created_at ON fare_calculations(created_at);
+CREATE INDEX IF NOT EXISTS idx_fare_calculations_vehicle_type ON fare_calculations(vehicle_type);
+CREATE INDEX IF NOT EXISTS idx_fare_calculations_client_id ON fare_calculations(client_id);
