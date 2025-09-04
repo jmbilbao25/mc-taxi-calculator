@@ -15,7 +15,7 @@ scrape_configs:
   # MC Taxi API metrics
   - job_name: 'mc-taxi-api'
     static_configs:
-      - targets: ['13.211.151.184:3001']
+      - targets: ['35.74.250.160:3001']
     metrics_path: '/metrics'
     scrape_interval: 30s
     scrape_timeout: 10s
@@ -28,7 +28,7 @@ scrape_configs:
   # AWS EC2 Instance
   - job_name: 'ec2-instance'
     static_configs:
-      - targets: ['13.211.151.184:9100']  # EC2 Public IP
+      - targets: ['35.74.250.160:9100']  # Updated EC2 Public IP
     scrape_interval: 30s
 
   # cAdvisor - Container metrics

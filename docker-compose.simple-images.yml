@@ -31,7 +31,7 @@ services:
     working_dir: /app
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_API_URL: http://35.74.250.160:3001
     ports:
       - "3000:3000"
     volumes:
