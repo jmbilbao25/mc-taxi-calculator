@@ -1,10 +1,10 @@
 #  MC Taxi Calculator
 
-A modern taxi fare calculator built with Next.js, Express.js, and PostgreSQL. Features real-time calculations, admin panel, and comprehensive monitoring.
+A motor taxi fare calculator built with Next.js, Express.js, and PostgreSQL. Features real-time calculations, admin panel, and comprehensive monitoring.
 
 ##  **My Learning Journey**
 
-This project represents my journey into **DevOps and Cloud Engineering**. As someone passionate about becoming a DevOps or Cloud Engineer, I created this simple taxi calculator to get hands-on experience with the technologies that are essential in modern cloud infrastructure.
+This project represents my learning expirience in engineering a small prototype project for a frontend and backend API using RESTful. This is not the **Best** way to configure, engineer, or design a system as this was just a prototype for my learning path. I'm planning to use kubernetes (k8) but maybe when i have some time. I was inspired to do this small project because of my current work, I was exposed to diffirent tech used in actual production hence it drives me to learn more of this as this is really interesting as heck. I am fammiliar with websocket like websocket.io but planned not to integrate it as it will take a huge amount of time sorry.
 
 ### **Why This Project?**
 
@@ -16,25 +16,10 @@ I wanted to build something practical while learning the core technologies that 
 - **Docker & Docker Compose**: Containerization is crucial for DevOps - learning how to package applications and manage multi-container environments
 - **Database Migration**: I started with MongoDB (NoSQL) to understand document-based databases, then migrated to PostgreSQL (SQL) on AWS RDS to experience the differences between NoSQL and relational databases
 
-### **What I Learned**
-
-This project taught me:
-- How to deploy applications on cloud infrastructure
-- The importance of containerization in modern development
-- Database management and migration strategies
-- API design and backend development
-- Monitoring and observability with Prometheus and Grafana
-- The differences between NoSQL and SQL databases in real-world scenarios
 
 ### **The Migration Story**
 
-Originally, this project used **MongoDB** - a NoSQL database that I was familiar with. However, I decided to migrate to **PostgreSQL on AWS RDS** to:
-- Experience the differences between NoSQL and SQL databases
-- Learn about managed database services
-- Understand data migration processes
-- Get familiar with relational database concepts
-
-This migration was a valuable learning experience that gave me insights into both database paradigms and helped me understand when to use each approach.
+Originally, this project used **MongoDB** - a NoSQL database that I was familiar with. However, I decided to migrate to **PostgreSQL on AWS RDS** to learn how to implement a database with SQL as my previous projects rely on NoSQL as a detabase. You can use this project as a means to help visualize a small scale infra.
 
 ---
 
@@ -74,7 +59,7 @@ This migration was a valuable learning experience that gave me insights into bot
 # Install dependencies
 npm install
 
-# Set up environment variables
+# Set up environment variables like API keys or database access
 cp env.example .env
 
 # Start with Docker
