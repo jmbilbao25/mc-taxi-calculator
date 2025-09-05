@@ -1,8 +1,6 @@
 #  MC Taxi Calculator
 
-A motor taxi fare calculator built with Next.js, Express.js, and PostgreSQL. Features real-time calculations, admin panel, and comprehensive monitoring.
-
-##  **My Learning Journey**
+A motor taxi fare calculator built with Next.js, Express.js, and PostgreSQL. Features real-time calculations, admin panel, and comprehensive monitoring yes sirrr.
 
 This project represents my learning expirience in engineering a small prototype project for a frontend and backend API using RESTful. This is not the **Best** way to configure, engineer, or design a system as this was just a prototype for my learning path. I'm planning to use kubernetes (k8) but maybe when i have some time. I was inspired to do this small project because of my current work, I was exposed to diffirent tech used in actual production hence it drives me to learn more of this as this is really interesting as heck. I am fammiliar with websocket like websocket.io but planned not to integrate it as it will take a huge amount of time sorry.
 
