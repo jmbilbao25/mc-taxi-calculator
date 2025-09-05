@@ -38,7 +38,6 @@ This migration was a valuable learning experience that gave me insights into bot
 
 ---
 
-*This project is my stepping stone into the world of DevOps and Cloud Engineering. Every line of code, every Docker container, and every AWS service configuration is a step closer to my goal of becoming a skilled cloud professional.*
 
 [![Next.js](https://img.shields.io/badge/Next.js-14.2.13-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
