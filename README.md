@@ -32,7 +32,7 @@ Originally, this project used **MongoDB** - a NoSQL database that I was familiar
 [![AWS](https://img.shields.io/badge/AWS-EC2_RDS-orange?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-blue?style=for-the-badge&logo=docker)](https://www.docker.com/)
 
-## 🖼️ Project Overview
+##  Project Overview
 
 <div align="center">
   <img src="public/postman.png" alt="Postman Collection" width="200" style="margin: 10px;">
@@ -46,7 +46,7 @@ Originally, this project used **MongoDB** - a NoSQL database that I was familiar
 - **API**: http://35.74.250.160:3001
 - **Admin**: http://35.74.250.160:3000/admin
 
-## 🛠 Tech Stack
+## Tech Stack
 
 **Frontend**: Next.js, TypeScript, React, Tailwind CSS, Framer Motion  
 **Backend**: Node.js, Express.js, PostgreSQL  
@@ -127,15 +127,12 @@ Frontend (Next.js) → API (Express.js) → Database (PostgreSQL)
 - Rate limiting and security
 - Docker containerization
 
-### 🎛️ Admin Panel
-
-Powerful admin interface for managing fare configurations and vehicle types:
+### Admin Panel
 
 **Admin Features:**
 - Dynamic fare configuration management
 - Vehicle type creation and deletion
 - Real-time fare rule updates
-- Beautiful, responsive interface
 - Confirmation modals for safety
 - Error handling and validation
 
