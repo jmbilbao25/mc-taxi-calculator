@@ -1,8 +1,8 @@
-# 🚖 MC Taxi Calculator
+#  MC Taxi Calculator
 
 A modern taxi fare calculator built with Next.js, Express.js, and PostgreSQL. Features real-time calculations, admin panel, and comprehensive monitoring.
 
-## 🎯 **My Learning Journey**
+##  **My Learning Journey**
 
 This project represents my journey into **DevOps and Cloud Engineering**. As someone passionate about becoming a DevOps or Cloud Engineer, I created this simple taxi calculator to get hands-on experience with the technologies that are essential in modern cloud infrastructure.
 
@@ -62,14 +62,14 @@ This migration was a valuable learning experience that gave me insights into bot
 - **API**: http://35.74.250.160:3001
 - **Admin**: http://35.74.250.160:3000/admin
 
-## 🛠️ Tech Stack
+## 🛠 Tech Stack
 
 **Frontend**: Next.js, TypeScript, React, Tailwind CSS, Framer Motion  
 **Backend**: Node.js, Express.js, PostgreSQL  
 **Infrastructure**: Docker, AWS EC2, AWS RDS  
 **Monitoring**: Prometheus, Grafana
 
-## 🚀 Quick Start
+##  Quick Start
 
 ```bash
 # Install dependencies
@@ -82,14 +82,14 @@ cp env.example .env
 docker-compose -f docker-compose.simple-images.yml up
 ```
 
-## 📱 API Endpoints
+##  API Endpoints
 
 - `POST /api/calculate-fare` - Calculate taxi fare
 - `GET /api/health` - Health check
 - `GET /metrics` - Prometheus metrics
 - `GET/POST/PUT /api/fare-config/*` - Fare configuration
 
-### 🧪 API Testing with Postman
+###  API Testing with Postman
 
 Complete Postman collection with all endpoints and automated tests:
 
@@ -102,7 +102,7 @@ Complete Postman collection with all endpoints and automated tests:
 - Error scenario testing
 - Rate limiting tests
 
-## 🏗️ Architecture
+## Architecture
 
 <div align="center">
   <img src="public/diagram.png" alt="System Architecture Diagram" width="800" style="margin: 20px 0;">
@@ -134,7 +134,7 @@ Frontend (Next.js) → API (Express.js) → Database (PostgreSQL)
                     Monitoring (Prometheus + Grafana)
 ```
 
-## ✨ Features
+##  Features
 
 - Real-time fare calculations
 - Admin panel for fare configuration
@@ -155,11 +155,11 @@ Powerful admin interface for managing fare configurations and vehicle types:
 - Confirmation modals for safety
 - Error handling and validation
 
-## 📊 Monitoring
+##  Monitoring
 
 Access Grafana dashboards for real-time metrics on application performance, system health, and business metrics.
 
-### 📈 Grafana Dashboards
+###  Grafana Dashboards
 
 Comprehensive monitoring with beautiful visualizations:
 
@@ -174,7 +174,7 @@ Comprehensive monitoring with beautiful visualizations:
 - Database performance tracking
 - Container resource utilization
 
-### 🔍 Prometheus Metrics
+###  Prometheus Metrics
 
 Powerful metrics collection and alerting:
 
